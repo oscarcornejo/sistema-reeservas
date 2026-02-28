@@ -43,7 +43,10 @@ export type SupportedCurrency = 'CLP' | 'MXN';
 export type SupportedLocale = 'es-CL' | 'es-MX';
 
 /** Tipo de notificación */
-export type NotificationType = 'new-booking' | 'booking-cancelled' | 'booking-reminder';
+export type NotificationType = 'new-booking' | 'booking-cancelled' | 'booking-rescheduled' | 'booking-reminder' | 'schedule-blocked' | 'schedule-unblocked';
+
+/** Tipo de bloqueo de agenda */
+export type ScheduleBlockType = 'day' | 'week' | 'month' | 'full';
 
 /** Origen del cliente */
 export type ClientSource = 'online' | 'walk-in' | 'referral' | 'marketplace';
@@ -242,7 +245,7 @@ export interface INotification {
   title: string;
   message: string;
   referenceId?: string;
-  referenceModel?: 'Appointment' | 'Business';
+  referenceModel?: 'Appointment' | 'Business' | 'ScheduleBlock';
   isRead: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -261,6 +264,34 @@ export interface ISubscription {
   paymentHistory: SubscriptionPaymentRecord[];
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface IScheduleBlock {
+  _id: Types.ObjectId;
+  professionalId: Types.ObjectId;
+  businessId: Types.ObjectId;
+  blockType: ScheduleBlockType;
+  startDate: Date;
+  endDate: Date | null;
+  reason: string;
+  createdBy: Types.ObjectId;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface IScheduleBlockSerialized {
+  _id: string;
+  professionalId: string;
+  businessId: string;
+  blockType: ScheduleBlockType;
+  startDate: string;
+  endDate: string | null;
+  reason: string;
+  createdBy: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // =============================================================================

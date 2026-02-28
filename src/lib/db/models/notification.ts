@@ -23,7 +23,10 @@ const NotificationSchema = new Schema(
             enum: [
                 'new-booking',
                 'booking-cancelled',
+                'booking-rescheduled',
                 'booking-reminder',
+                'schedule-blocked',
+                'schedule-unblocked',
             ] satisfies NotificationType[],
             required: [true, 'El tipo es requerido'],
         },
@@ -40,7 +43,7 @@ const NotificationSchema = new Schema(
         referenceId: { type: String },
         referenceModel: {
             type: String,
-            enum: ['Appointment', 'Business'],
+            enum: ['Appointment', 'Business', 'ScheduleBlock'],
         },
         isRead: {
             type: Boolean,

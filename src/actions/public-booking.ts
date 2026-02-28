@@ -7,7 +7,7 @@
 'use server';
 
 import { connectDB } from '@/lib/db/connection';
-import { Appointment, Service, Professional, Client, Business } from '@/lib/db/models';
+import { Appointment, Service, Professional, Client, Business, ScheduleBlock } from '@/lib/db/models';
 import { publicBookingSchema } from '@/lib/validators/schemas';
 import { addMinutes, format, parseISO, startOfDay, endOfDay, isBefore, startOfToday } from 'date-fns';
 import { sendBookingNotifications } from '@/lib/notifications/booking-notifications';
@@ -62,6 +62,20 @@ export async function createPublicBooking(
         const appointmentDate = parseISO(parsed.data.date);
         if (isBefore(appointmentDate, startOfToday())) {
             return { success: false, error: 'La fecha debe ser futura' };
+        }
+
+        // Verificar que no haya bloqueo activo
+        const activeBlock = await ScheduleBlock.findOne({
+            professionalId: parsed.data.professionalId,
+            isActive: true,
+            $or: [
+                { endDate: null, startDate: { $lte: endOfDay(appointmentDate) } },
+                { startDate: { $lte: endOfDay(appointmentDate) }, endDate: { $gte: startOfDay(appointmentDate) } },
+            ],
+        }).lean();
+
+        if (activeBlock) {
+            return { success: false, error: 'El profesional no está disponible en esta fecha (agenda bloqueada)' };
         }
 
         // Calcular hora de fin

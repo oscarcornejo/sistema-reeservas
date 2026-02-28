@@ -93,6 +93,22 @@ export const publicBookingSchema = z.object({
     clientNotes: z.string().max(500).optional(),
 });
 
+/** Schema para reagendar una cita */
+export const rescheduleAppointmentSchema = z.object({
+    appointmentId: z.string().min(1, 'La cita es requerida'),
+    date: z.string().min(1, 'La nueva fecha es requerida'),
+    startTime: z.string().regex(/^\d{2}:\d{2}$/, 'Formato de hora inválido (HH:MM)'),
+});
+
+/** Schema para cancelar una cita */
+export const cancelAppointmentSchema = z.object({
+    appointmentId: z.string().min(1, 'La cita es requerida'),
+    cancellationReason: z
+        .string()
+        .min(10, 'El motivo debe tener al menos 10 caracteres')
+        .max(500, 'Máximo 500 caracteres'),
+});
+
 // =============================================================================
 // Profesionales
 // =============================================================================
@@ -176,6 +192,25 @@ export const clientSchema = z.object({
 });
 
 // =============================================================================
+// Bloqueo de agenda
+// =============================================================================
+
+/** Schema para crear un bloqueo de agenda */
+export const createScheduleBlockSchema = z.object({
+    professionalId: z.string().min(1, 'El profesional es requerido'),
+    blockType: z.enum(['day', 'week', 'month', 'full'], {
+        error: 'Selecciona un tipo de bloqueo válido',
+    }),
+    startDate: z.string().min(1, 'La fecha de inicio es requerida'),
+    reason: z.string().min(5, 'El motivo debe tener al menos 5 caracteres').max(500, 'Máximo 500 caracteres'),
+});
+
+/** Schema para eliminar un bloqueo de agenda */
+export const removeScheduleBlockSchema = z.object({
+    blockId: z.string().min(1, 'El bloqueo es requerido'),
+});
+
+// =============================================================================
 // Perfil de usuario
 // =============================================================================
 
@@ -229,3 +264,7 @@ export type BusinessPreferencesInput = z.infer<typeof businessPreferencesSchema>
 export type ClientInput = z.infer<typeof clientSchema>;
 export type ProfileInput = z.infer<typeof profileSchema>;
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+export type RescheduleAppointmentInput = z.infer<typeof rescheduleAppointmentSchema>;
+export type CancelAppointmentInput = z.infer<typeof cancelAppointmentSchema>;
+export type CreateScheduleBlockInput = z.infer<typeof createScheduleBlockSchema>;
+export type RemoveScheduleBlockInput = z.infer<typeof removeScheduleBlockSchema>;

@@ -6,12 +6,14 @@
 'use server';
 
 import { connectDB } from '@/lib/db/connection';
-import { Appointment, Service, Professional } from '@/lib/db/models';
+import { Appointment, Service, Professional, Client, ScheduleBlock } from '@/lib/db/models';
 import { requireAuth, getUserBusiness } from '@/lib/auth/dal';
-import { createAppointmentSchema } from '@/lib/validators/schemas';
+import { createAppointmentSchema, rescheduleAppointmentSchema, cancelAppointmentSchema } from '@/lib/validators/schemas';
 import { addMinutes, format, parseISO, startOfDay, endOfDay } from 'date-fns';
+import { updateTag } from 'next/cache';
 import { serialize } from '@/lib/utils';
-import type { ActionResult, IAppointment, AppointmentStatus } from '@/types';
+import { sendRescheduleNotifications, sendCancellationNotifications } from '@/lib/notifications/booking-notifications';
+import type { ActionResult, IAppointment, IAppointmentPopulated, AppointmentStatus } from '@/types';
 
 /**
  * Crear una nueva cita verificando disponibilidad.
@@ -38,6 +40,21 @@ export async function createAppointment(
 
     try {
         await connectDB();
+
+        // Verificar que no haya bloqueo activo
+        const appointmentDateForBlock = parseISO(parsed.data.date);
+        const activeBlock = await ScheduleBlock.findOne({
+            professionalId: parsed.data.professionalId,
+            isActive: true,
+            $or: [
+                { endDate: null, startDate: { $lte: endOfDay(appointmentDateForBlock) } },
+                { startDate: { $lte: endOfDay(appointmentDateForBlock) }, endDate: { $gte: startOfDay(appointmentDateForBlock) } },
+            ],
+        }).lean();
+
+        if (activeBlock) {
+            return { success: false, error: 'El profesional no está disponible en esta fecha (agenda bloqueada)' };
+        }
 
         // Obtener duración del servicio
         const service = await Service.findById(parsed.data.serviceId);
@@ -149,6 +166,299 @@ export async function updateAppointmentStatus(
 }
 
 /**
+ * Reagendar una cita existente.
+ * Verifica permisos por rol y disponibilidad del nuevo horario.
+ */
+export async function rescheduleAppointment(
+    formData: FormData
+): Promise<ActionResult> {
+    const user = await requireAuth();
+
+    const rawData = {
+        appointmentId: formData.get('appointmentId') as string,
+        date: formData.get('date') as string,
+        startTime: formData.get('startTime') as string,
+    };
+
+    const parsed = rescheduleAppointmentSchema.safeParse(rawData);
+    if (!parsed.success) {
+        return { success: false, error: parsed.error.issues[0].message };
+    }
+
+    try {
+        await connectDB();
+
+        const appointment = await Appointment.findById(parsed.data.appointmentId)
+            .populate('professionalId', 'displayName userId')
+            .populate('clientId', 'name email userId')
+            .populate('serviceId', 'name duration price');
+
+        if (!appointment) {
+            return { success: false, error: 'Cita no encontrada' };
+        }
+
+        // No se pueden reagendar citas finalizadas
+        const finalStatuses: AppointmentStatus[] = ['completed', 'cancelled', 'no-show'];
+        if (finalStatuses.includes(appointment.status as AppointmentStatus)) {
+            return { success: false, error: 'No se puede reagendar una cita finalizada' };
+        }
+
+        // Verificar autorización por rol
+        const prof = appointment.professionalId as unknown as { _id: string; userId: string; displayName: string };
+        const client = appointment.clientId as unknown as { _id: string; name: string; email: string; userId?: string };
+        const service = appointment.serviceId as unknown as { _id: string; name: string; duration: number; price: number };
+
+        const isAdmin = user.role === 'admin';
+        const isProfessional = user.role === 'professional' && prof.userId?.toString() === user.id;
+        const isClient = user.role === 'client' && client.userId?.toString() === user.id;
+
+        if (!isAdmin && !isProfessional && !isClient) {
+            return { success: false, error: 'No tienes permiso para reagendar esta cita' };
+        }
+
+        // Calcular endTime con la duración del servicio
+        const [hours, minutes] = parsed.data.startTime.split(':').map(Number);
+        const startDate = new Date();
+        startDate.setHours(hours, minutes, 0, 0);
+        const endDate = addMinutes(startDate, service.duration);
+        const endTime = format(endDate, 'HH:mm');
+
+        // Verificar disponibilidad (excluyendo esta misma cita)
+        const appointmentDate = parseISO(parsed.data.date);
+        const conflicting = await Appointment.findOne({
+            _id: { $ne: appointment._id },
+            professionalId: prof._id,
+            date: {
+                $gte: startOfDay(appointmentDate),
+                $lte: endOfDay(appointmentDate),
+            },
+            status: { $nin: ['cancelled', 'no-show'] },
+            $or: [
+                {
+                    startTime: { $lt: endTime },
+                    endTime: { $gt: parsed.data.startTime },
+                },
+            ],
+        });
+
+        if (conflicting) {
+            return { success: false, error: 'El horario seleccionado no está disponible' };
+        }
+
+        // Guardar datos anteriores para notificación
+        const previousDate = appointment.date;
+        const previousStartTime = appointment.startTime;
+
+        await Appointment.findByIdAndUpdate(appointment._id, {
+            date: appointmentDate,
+            startTime: parsed.data.startTime,
+            endTime,
+        });
+
+        updateTag('dashboard-metrics');
+
+        // Notificaciones fire-and-forget
+        sendRescheduleNotifications({
+            appointmentId: appointment._id.toString(),
+            businessId: appointment.businessId.toString(),
+            serviceName: service.name,
+            professionalName: prof.displayName,
+            clientName: client.name,
+            clientEmail: client.email,
+            previousDate,
+            previousStartTime,
+            newDate: appointmentDate,
+            newStartTime: parsed.data.startTime,
+            actorId: user.id!,
+            actorRole: user.role!,
+            professionalUserId: prof.userId?.toString(),
+            clientUserId: client.userId?.toString(),
+        });
+
+        return { success: true };
+    } catch (error) {
+        console.error('Error reagendando cita:', error);
+        return { success: false, error: 'Error al reagendar la cita' };
+    }
+}
+
+/**
+ * Cancelar una cita existente con motivo obligatorio.
+ * Verifica permisos por rol.
+ */
+export async function cancelAppointment(
+    formData: FormData
+): Promise<ActionResult> {
+    const user = await requireAuth();
+
+    const rawData = {
+        appointmentId: formData.get('appointmentId') as string,
+        cancellationReason: formData.get('cancellationReason') as string,
+    };
+
+    const parsed = cancelAppointmentSchema.safeParse(rawData);
+    if (!parsed.success) {
+        return { success: false, error: parsed.error.issues[0].message };
+    }
+
+    try {
+        await connectDB();
+
+        const appointment = await Appointment.findById(parsed.data.appointmentId)
+            .populate('professionalId', 'displayName userId')
+            .populate('clientId', 'name email userId')
+            .populate('serviceId', 'name duration price');
+
+        if (!appointment) {
+            return { success: false, error: 'Cita no encontrada' };
+        }
+
+        const finalStatuses: AppointmentStatus[] = ['completed', 'cancelled', 'no-show'];
+        if (finalStatuses.includes(appointment.status as AppointmentStatus)) {
+            return { success: false, error: 'No se puede cancelar una cita finalizada' };
+        }
+
+        const prof = appointment.professionalId as unknown as { _id: string; userId: string; displayName: string };
+        const client = appointment.clientId as unknown as { _id: string; name: string; email: string; userId?: string };
+        const service = appointment.serviceId as unknown as { _id: string; name: string; duration: number; price: number };
+
+        const isAdmin = user.role === 'admin';
+        const isProfessional = user.role === 'professional' && prof.userId?.toString() === user.id;
+        const isClient = user.role === 'client' && client.userId?.toString() === user.id;
+
+        if (!isAdmin && !isProfessional && !isClient) {
+            return { success: false, error: 'No tienes permiso para cancelar esta cita' };
+        }
+
+        await Appointment.findByIdAndUpdate(appointment._id, {
+            status: 'cancelled',
+            cancellationReason: parsed.data.cancellationReason,
+        });
+
+        updateTag('dashboard-metrics');
+
+        // Notificaciones fire-and-forget
+        sendCancellationNotifications({
+            appointmentId: appointment._id.toString(),
+            businessId: appointment.businessId.toString(),
+            serviceName: service.name,
+            professionalName: prof.displayName,
+            clientName: client.name,
+            clientEmail: client.email,
+            date: appointment.date,
+            startTime: appointment.startTime,
+            cancellationReason: parsed.data.cancellationReason,
+            actorId: user.id!,
+            actorRole: user.role!,
+            professionalUserId: prof.userId?.toString(),
+            clientUserId: client.userId?.toString(),
+        });
+
+        return { success: true };
+    } catch (error) {
+        console.error('Error cancelando cita:', error);
+        return { success: false, error: 'Error al cancelar la cita' };
+    }
+}
+
+/**
+ * Obtener citas del profesional autenticado por rango de fechas.
+ */
+export async function getProfessionalAppointments(
+    startDate: string,
+    endDate: string
+): Promise<ActionResult<IAppointmentPopulated[]>> {
+    const user = await requireAuth();
+
+    if (user.role !== 'professional') {
+        return { success: false, error: 'Acceso no autorizado' };
+    }
+
+    try {
+        await connectDB();
+
+        const professional = await Professional.findOne({ userId: user.id });
+        if (!professional) {
+            return { success: false, error: 'Perfil profesional no encontrado' };
+        }
+
+        const appointments = await Appointment.find({
+            professionalId: professional._id,
+            date: {
+                $gte: parseISO(startDate),
+                $lte: parseISO(endDate),
+            },
+        })
+            .populate('serviceId', 'name duration price')
+            .populate('professionalId', 'displayName avatar')
+            .populate('clientId', 'name email phone')
+            .sort({ date: 1, startTime: 1 })
+            .lean();
+
+        return { success: true, data: serialize(appointments) as unknown as IAppointmentPopulated[] };
+    } catch (error) {
+        console.error('Error obteniendo citas del profesional:', error);
+        return { success: false, error: 'Error al obtener las citas' };
+    }
+}
+
+/**
+ * Obtener citas del cliente autenticado (próximas o pasadas).
+ */
+export async function getClientAppointments(
+    filter: 'upcoming' | 'past'
+): Promise<ActionResult<IAppointmentPopulated[]>> {
+    const user = await requireAuth();
+
+    if (user.role !== 'client') {
+        return { success: false, error: 'Acceso no autorizado' };
+    }
+
+    try {
+        await connectDB();
+
+        // Un usuario puede tener perfiles de cliente en múltiples negocios
+        const clientProfiles = await Client.find({ userId: user.id }).lean();
+        if (clientProfiles.length === 0) {
+            return { success: true, data: [] };
+        }
+
+        const clientIds = clientProfiles.map((c) => c._id);
+        const today = startOfDay(new Date());
+
+        let query: Record<string, unknown>;
+        if (filter === 'upcoming') {
+            query = {
+                clientId: { $in: clientIds },
+                date: { $gte: today },
+                status: { $nin: ['cancelled', 'no-show', 'completed'] },
+            };
+        } else {
+            query = {
+                clientId: { $in: clientIds },
+                $or: [
+                    { date: { $lt: today } },
+                    { status: { $in: ['completed', 'cancelled', 'no-show'] } },
+                ],
+            };
+        }
+
+        const appointments = await Appointment.find(query)
+            .populate('serviceId', 'name duration price')
+            .populate('professionalId', 'displayName avatar')
+            .populate('clientId', 'name email phone')
+            .populate('businessId', 'name slug')
+            .sort({ date: filter === 'upcoming' ? 1 : -1, startTime: filter === 'upcoming' ? 1 : -1 })
+            .lean();
+
+        return { success: true, data: serialize(appointments) as unknown as IAppointmentPopulated[] };
+    } catch (error) {
+        console.error('Error obteniendo citas del cliente:', error);
+        return { success: false, error: 'Error al obtener las citas' };
+    }
+}
+
+/**
  * Obtener citas por rango de fechas para el negocio del admin.
  */
 export async function getBusinessAppointments(
@@ -221,6 +531,20 @@ export async function getAvailableSlots(
         );
         if (!daySchedule || daySchedule.slots.length === 0) {
             return { success: true, data: [] }; // No trabaja este día
+        }
+
+        // Verificar bloqueo activo para el día
+        const activeBlock = await ScheduleBlock.findOne({
+            professionalId,
+            isActive: true,
+            $or: [
+                { endDate: null, startDate: { $lte: endOfDay(targetDate) } },
+                { startDate: { $lte: endOfDay(targetDate) }, endDate: { $gte: startOfDay(targetDate) } },
+            ],
+        }).lean();
+
+        if (activeBlock) {
+            return { success: true, data: [] }; // Día bloqueado
         }
 
         // Citas existentes del día

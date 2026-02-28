@@ -52,6 +52,7 @@ import {
   TooltipProvider,
 } from "@/components/ui/tooltip";
 import {
+  Ban,
   ChevronLeft,
   ChevronRight,
   Clock,
@@ -70,9 +71,15 @@ import {
   getBusinessAppointments,
   getBusinessProfessionals,
 } from "@/actions/appointments";
+import { getScheduleBlocks } from "@/actions/schedule-blocks";
 import { getBusinessSettings } from "@/actions/business";
 import { getBusinessServices } from "@/actions/services";
 import { createPublicBooking } from "@/actions/public-booking";
+import { AppointmentDetailDialog } from "@/components/booking/AppointmentDetailDialog";
+import { RescheduleDialog } from "@/components/booking/RescheduleDialog";
+import { CancelDialog } from "@/components/booking/CancelDialog";
+import { ScheduleBlockDialog } from "@/components/booking/ScheduleBlockDialog";
+import { UnblockDialog } from "@/components/booking/UnblockDialog";
 import {
   formatRelativeDate,
   APPOINTMENT_STATUS_CONFIG,
@@ -96,6 +103,7 @@ import { toast } from "sonner";
 import type {
   IAppointment,
   IAppointmentPopulated,
+  IScheduleBlockSerialized,
   AppointmentStatus,
   IService,
 } from "@/types";
@@ -227,6 +235,26 @@ function durationToPx(duration: number): number {
   return (duration / 60) * HOUR_WIDTH_PX;
 }
 
+/** Verifica si una fecha está bloqueada para un profesional */
+function isDateBlocked(
+  date: Date,
+  profId: string,
+  blocks: IScheduleBlockSerialized[],
+): IScheduleBlockSerialized | null {
+  for (const block of blocks) {
+    if (block.professionalId !== profId) continue;
+    const blockStart = new Date(block.startDate);
+    if (block.endDate === null) {
+      // Bloqueo 'full': desde startDate en adelante
+      if (date >= blockStart) return block;
+    } else {
+      const blockEnd = new Date(block.endDate);
+      if (date >= blockStart && date <= blockEnd) return block;
+    }
+  }
+  return null;
+}
+
 // ─── Componente principal ────────────────────────────────────────────────────
 
 export default function CalendarPage() {
@@ -251,6 +279,19 @@ export default function CalendarPage() {
     professionalName: string;
     startTime: string;
   } | null>(null);
+
+  // Appointment detail / reschedule / cancel
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<IAppointmentPopulated | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [rescheduleOpen, setRescheduleOpen] = useState(false);
+  const [cancelOpen, setCancelOpen] = useState(false);
+
+  // Schedule blocks
+  const [scheduleBlocks, setScheduleBlocks] = useState<IScheduleBlockSerialized[]>([]);
+  const [blockDialogOpen, setBlockDialogOpen] = useState(false);
+  const [unblockDialogOpen, setUnblockDialogOpen] = useState(false);
+  const [selectedBlock, setSelectedBlock] = useState<IScheduleBlockSerialized | null>(null);
 
   // ─── Carga de datos ──────────────────────────────────────────────────────
 
@@ -299,11 +340,17 @@ export default function CalendarPage() {
     }
 
     startTransition(async () => {
-      const result = await getBusinessAppointments(start, end);
-      if (result.success && result.data) {
-        setAppointments(result.data);
+      const [aptsResult, blocksResult] = await Promise.all([
+        getBusinessAppointments(start, end),
+        getScheduleBlocks(undefined, start, end),
+      ]);
+      if (aptsResult.success && aptsResult.data) {
+        setAppointments(aptsResult.data);
       } else {
-        toast.error(result.error || "Error al cargar citas");
+        toast.error(aptsResult.error || "Error al cargar citas");
+      }
+      if (blocksResult.success && blocksResult.data) {
+        setScheduleBlocks(blocksResult.data);
       }
     });
   }, [selectedDate, timeRange]);
@@ -390,6 +437,36 @@ export default function CalendarPage() {
     [],
   );
 
+  // ─── Appointment interaction handlers ─────────────────────────────────
+
+  const handleAppointmentClick = useCallback(
+    (apt: IAppointmentPopulated) => {
+      setSelectedAppointment(apt);
+      setDetailOpen(true);
+    },
+    [],
+  );
+
+  const handleReschedule = useCallback((apt: IAppointmentPopulated) => {
+    setDetailOpen(false);
+    setSelectedAppointment(apt);
+    setRescheduleOpen(true);
+  }, []);
+
+  const handleCancel = useCallback((apt: IAppointmentPopulated) => {
+    setDetailOpen(false);
+    setSelectedAppointment(apt);
+    setCancelOpen(true);
+  }, []);
+
+  const handleActionSuccess = useCallback(() => {
+    setDetailOpen(false);
+    setRescheduleOpen(false);
+    setCancelOpen(false);
+    setSelectedAppointment(null);
+    loadAppointments();
+  }, [loadAppointments]);
+
   // ─── Render ──────────────────────────────────────────────────────────────
 
   const isLoading = isPending || isLoadingProfessionals;
@@ -442,6 +519,15 @@ export default function CalendarPage() {
               </p>
             </div>
             <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-border/60 text-destructive hover:text-destructive"
+                onClick={() => setBlockDialogOpen(true)}
+              >
+                <Ban className="h-4 w-4" />
+                <span className="hidden sm:inline">Bloquear agenda</span>
+              </Button>
               <Button
                 variant="outline"
                 size="icon"
@@ -745,20 +831,24 @@ export default function CalendarPage() {
                 appointments={appointments}
                 selectedDate={selectedDate}
                 professionals={professionals}
+                scheduleBlocks={scheduleBlocks}
                 onDayClick={(day) => {
                   setTimeRange("today");
                   setSelectedDate(day);
                 }}
+                onAppointmentClick={handleAppointmentClick}
               />
             ) : timeRange === "month" ? (
               <MonthView
                 appointments={appointments}
                 selectedDate={selectedDate}
                 professionals={professionals}
+                scheduleBlocks={scheduleBlocks}
                 onDayClick={(day) => {
                   setTimeRange("today");
                   setSelectedDate(day);
                 }}
+                onAppointmentClick={handleAppointmentClick}
               />
             ) : visibleProfessionals.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 gap-3">
@@ -776,7 +866,13 @@ export default function CalendarPage() {
                 visibleProfessionals={visibleProfessionals}
                 dayAppointments={dayAppointments}
                 selectedDate={selectedDate}
+                scheduleBlocks={scheduleBlocks}
                 onTrackClick={handleTrackClick}
+                onAppointmentClick={handleAppointmentClick}
+                onBlockClick={(block) => {
+                  setSelectedBlock(block);
+                  setUnblockDialogOpen(true);
+                }}
               />
             )}
           </CardContent>
@@ -797,6 +893,49 @@ export default function CalendarPage() {
           loadAppointments();
         }}
       />
+
+      {/* Appointment detail / reschedule / cancel dialogs */}
+      <AppointmentDetailDialog
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        appointment={selectedAppointment}
+        userRole="admin"
+        onReschedule={handleReschedule}
+        onCancel={handleCancel}
+      />
+      <RescheduleDialog
+        open={rescheduleOpen}
+        onOpenChange={setRescheduleOpen}
+        appointment={selectedAppointment}
+        onSuccess={handleActionSuccess}
+      />
+      <CancelDialog
+        open={cancelOpen}
+        onOpenChange={setCancelOpen}
+        appointment={selectedAppointment}
+        onSuccess={handleActionSuccess}
+      />
+      <ScheduleBlockDialog
+        open={blockDialogOpen}
+        onOpenChange={setBlockDialogOpen}
+        professionals={professionals}
+        selectedDate={selectedDate}
+        userRole="admin"
+        onSuccess={() => {
+          setBlockDialogOpen(false);
+          loadAppointments();
+        }}
+      />
+      <UnblockDialog
+        open={unblockDialogOpen}
+        onOpenChange={setUnblockDialogOpen}
+        block={selectedBlock}
+        onSuccess={() => {
+          setUnblockDialogOpen(false);
+          setSelectedBlock(null);
+          loadAppointments();
+        }}
+      />
     </div>
   );
 }
@@ -807,12 +946,16 @@ function WeekView({
   appointments,
   selectedDate,
   professionals,
+  scheduleBlocks,
   onDayClick,
+  onAppointmentClick,
 }: {
   appointments: IAppointment[];
   selectedDate: Date;
   professionals: ProfessionalInfo[];
+  scheduleBlocks: IScheduleBlockSerialized[];
   onDayClick: (day: Date) => void;
+  onAppointmentClick?: (apt: IAppointmentPopulated) => void;
 }) {
   const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 });
   const weekEnd = endOfWeek(selectedDate, { weekStartsOn: 1 });
@@ -826,11 +969,14 @@ function WeekView({
             isSameDay(new Date(apt.date), day),
           );
           const today = isToday(day);
+          const hasBlocked = professionals.some(
+            (p) => isDateBlocked(day, p.id, scheduleBlocks) !== null,
+          );
 
           return (
             <div
               key={day.toISOString()}
-              className="bg-card flex flex-col cursor-pointer hover:bg-muted/40 transition-colors"
+              className={`bg-card flex flex-col cursor-pointer hover:bg-muted/40 transition-colors ${hasBlocked ? "bg-red-500/[0.03]" : ""}`}
               onClick={() => onDayClick(day)}
             >
               {/* Header del día */}
@@ -848,6 +994,12 @@ function WeekView({
                 {dayApts.length > 0 && (
                   <span className="text-[10px] text-muted-foreground">
                     {dayApts.length} {dayApts.length === 1 ? "cita" : "citas"}
+                  </span>
+                )}
+                {hasBlocked && (
+                  <span className="flex items-center justify-center gap-0.5 text-[10px] text-red-500">
+                    <Ban className="h-2.5 w-2.5" />
+                    Bloqueado
                   </span>
                 )}
               </div>
@@ -870,8 +1022,11 @@ function WeekView({
                   return (
                     <div
                       key={apt._id.toString()}
-                      className={`flex items-center gap-1.5 px-1.5 py-1 rounded-md ${color.bg} ${color.border} border text-[11px] leading-tight`}
-                      onClick={(e) => e.stopPropagation()}
+                      className={`flex items-center gap-1.5 px-1.5 py-1 rounded-md ${color.bg} ${color.border} border text-[11px] leading-tight cursor-pointer hover:opacity-80 transition-opacity`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onAppointmentClick?.(apt as unknown as IAppointmentPopulated);
+                      }}
                     >
                       <div
                         className={`h-1.5 w-1.5 rounded-full shrink-0 ${statusConfig.dot}`}
@@ -902,12 +1057,16 @@ function MonthView({
   appointments,
   selectedDate,
   professionals,
+  scheduleBlocks,
   onDayClick,
+  onAppointmentClick,
 }: {
   appointments: IAppointment[];
   selectedDate: Date;
   professionals: ProfessionalInfo[];
+  scheduleBlocks: IScheduleBlockSerialized[];
   onDayClick: (day: Date) => void;
+  onAppointmentClick?: (apt: IAppointmentPopulated) => void;
 }) {
   const monthStart = startOfMonth(selectedDate);
   const monthEnd = endOfMonth(selectedDate);
@@ -936,18 +1095,24 @@ function MonthView({
           );
           const inMonth = isSameMonth(day, selectedDate);
           const today = isToday(day);
+          const hasBlocked = professionals.some(
+            (p) => isDateBlocked(day, p.id, scheduleBlocks) !== null,
+          );
 
           return (
             <div
               key={day.toISOString()}
-              className={`bg-card min-h-[100px] p-1.5 cursor-pointer hover:bg-muted/40 transition-colors ${!inMonth ? "opacity-40" : ""}`}
+              className={`bg-card min-h-[100px] p-1.5 cursor-pointer hover:bg-muted/40 transition-colors ${!inMonth ? "opacity-40" : ""} ${hasBlocked && inMonth ? "bg-red-500/[0.03]" : ""}`}
               onClick={() => onDayClick(day)}
             >
-              <span
-                className={`inline-flex items-center justify-center text-sm font-medium h-6 min-w-6 ${today ? "bg-primary text-primary-foreground rounded-full px-1.5" : ""}`}
-              >
-                {format(day, "d")}
-              </span>
+              <div className="flex items-center gap-1">
+                <span
+                  className={`inline-flex items-center justify-center text-sm font-medium h-6 min-w-6 ${today ? "bg-primary text-primary-foreground rounded-full px-1.5" : ""}`}
+                >
+                  {format(day, "d")}
+                </span>
+                {hasBlocked && inMonth && <Ban className="h-3 w-3 text-red-500/60" />}
+              </div>
               {/* Indicadores de citas */}
               {dayApts.length > 0 && (
                 <div className="mt-1 space-y-0.5">
@@ -966,7 +1131,11 @@ function MonthView({
                     return (
                       <div
                         key={apt._id.toString()}
-                        className="flex items-center gap-1 text-[10px] leading-tight"
+                        className="flex items-center gap-1 text-[10px] leading-tight cursor-pointer hover:opacity-80 transition-opacity"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onAppointmentClick?.(apt as unknown as IAppointmentPopulated);
+                        }}
                       >
                         <div
                           className={`h-1.5 w-1.5 rounded-full shrink-0 ${color.dot}`}
@@ -1002,17 +1171,23 @@ function ResourceTimelineView({
   visibleProfessionals,
   dayAppointments,
   selectedDate,
+  scheduleBlocks,
   onTrackClick,
+  onAppointmentClick,
+  onBlockClick,
 }: {
   professionals: ProfessionalInfo[];
   visibleProfessionals: ProfessionalInfo[];
   dayAppointments: IAppointment[];
   selectedDate: Date;
+  scheduleBlocks: IScheduleBlockSerialized[];
   onTrackClick?: (
     professionalId: string,
     professionalName: string,
     startTime: string,
   ) => void;
+  onAppointmentClick?: (apt: IAppointmentPopulated) => void;
+  onBlockClick?: (block: IScheduleBlockSerialized) => void;
 }) {
   const totalWidth = WORK_HOURS.length * HOUR_WIDTH_PX;
   const isTodaySelected = isToday(selectedDate);
@@ -1134,6 +1309,7 @@ function ResourceTimelineView({
           const profAppointments = dayAppointments.filter(
             (apt) => getProfIdFromAppointment(apt) === prof.id,
           );
+          const blockedBlock = isDateBlocked(selectedDate, prof.id, scheduleBlocks);
 
           return (
             <div
@@ -1199,8 +1375,29 @@ function ResourceTimelineView({
                     key={apt._id.toString()}
                     appointment={apt as unknown as IAppointmentPopulated}
                     color={color}
+                    onClick={onAppointmentClick}
                   />
                 ))}
+
+                {/* Overlay de bloqueo */}
+                {blockedBlock && (
+                  <div
+                    className="absolute inset-0 z-[5] flex items-center justify-center gap-2 cursor-pointer"
+                    style={{
+                      background:
+                        "repeating-linear-gradient(135deg, transparent, transparent 4px, rgba(239,68,68,0.08) 4px, rgba(239,68,68,0.08) 8px)",
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onBlockClick?.(blockedBlock);
+                    }}
+                  >
+                    <Ban className="h-4 w-4 text-red-500/60" />
+                    <span className="text-xs font-medium text-red-500/70">
+                      Bloqueado
+                    </span>
+                  </div>
+                )}
 
                 {/* Línea "ahora" */}
                 {nowInRange && (
@@ -1239,9 +1436,11 @@ const WIDE_BLOCK_THRESHOLD = 120;
 function AppointmentBlock({
   appointment: apt,
   color,
+  onClick,
 }: {
   appointment: IAppointmentPopulated;
   color: (typeof PROFESSIONAL_COLORS)[number];
+  onClick?: (apt: IAppointmentPopulated) => void;
 }) {
   const startMin = timeToMinutes(apt.startTime);
   const left = minutesToPx(startMin);
@@ -1265,14 +1464,17 @@ function AppointmentBlock({
     <Tooltip>
       <TooltipTrigger asChild>
         <div
-          className={`absolute top-1.5 bottom-1.5 rounded-lg overflow-hidden cursor-default transition-all
+          className={`absolute top-1.5 bottom-1.5 rounded-lg overflow-hidden cursor-pointer transition-all
                         bg-card border ${color.border}
                         ${apt.status === "pending" ? "border-dashed" : ""}
                         ${apt.status === "in-progress" ? "ring-2 ring-primary/25" : ""}
                         ${isReduced ? "opacity-60" : ""}
                         shadow-sm hover:shadow-md hover:z-20 hover:scale-[1.02]`}
           style={{ left, width: effectiveWidth }}
-          onClick={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            onClick?.(apt);
+          }}
         >
           {/* Color tint overlay — makes block identifiable by professional */}
           <div className={`absolute inset-0 ${color.bg} pointer-events-none`} />

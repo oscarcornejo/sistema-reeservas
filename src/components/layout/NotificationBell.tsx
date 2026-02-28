@@ -7,7 +7,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Bell, CalendarPlus, Check, CheckCheck, Loader2 } from 'lucide-react';
+import { Ban, Bell, CalendarCheck2, CalendarPlus, Check, CheckCheck, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     Popover,
@@ -31,7 +31,10 @@ import type { NotificationType } from '@/types';
 const TYPE_ICONS: Record<NotificationType, typeof CalendarPlus> = {
     'new-booking': CalendarPlus,
     'booking-cancelled': CalendarPlus,
+    'booking-rescheduled': CalendarPlus,
     'booking-reminder': Bell,
+    'schedule-blocked': Ban,
+    'schedule-unblocked': CalendarCheck2,
 };
 
 interface NotificationItem {
