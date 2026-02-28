@@ -1,26 +1,293 @@
 @import "tailwindcss";
 
+/*
+ * ============================================================================
+ * TurnoPro — Design System Foundation
+ * Estilo: Minimal premium (Linear/Vercel/Stripe)
+ * Paleta: Violeta OKLCH + zinc neutro
+ * ============================================================================
+ */
+
+/* --------------------------------------------------------------------------
+ * Light theme (default)
+ * ----------------------------------------------------------------------- */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: oklch(0.985 0.002 286);
+  --foreground: oklch(0.145 0.014 286);
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0.014 286);
+
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0.014 286);
+
+  --primary: oklch(0.546 0.245 262.88);
+  --primary-foreground: oklch(0.985 0.002 286);
+
+  --secondary: oklch(0.967 0.003 286);
+  --secondary-foreground: oklch(0.205 0.016 286);
+
+  --muted: oklch(0.967 0.003 286);
+  --muted-foreground: oklch(0.556 0.016 286);
+
+  --accent: oklch(0.627 0.168 256);
+  --accent-foreground: oklch(0.985 0.002 286);
+
+  --destructive: oklch(0.577 0.245 27.33);
+  --destructive-foreground: oklch(0.985 0.002 286);
+
+  --border: oklch(0.922 0.004 286);
+  --input: oklch(0.85 0.006 286);
+  --ring: oklch(0.546 0.245 262.88);
+
+  --chart-1: oklch(0.546 0.245 262.88);
+  --chart-2: oklch(0.627 0.168 256);
+  --chart-3: oklch(0.627 0.194 149);
+  --chart-4: oklch(0.68 0.162 75);
+  --chart-5: oklch(0.645 0.246 16);
+
+  /* Sidebar tokens */
+  --sidebar: oklch(0.985 0.002 286);
+  --sidebar-foreground: oklch(0.365 0.014 286);
+  --sidebar-primary: oklch(0.546 0.245 262.88);
+  --sidebar-primary-foreground: oklch(0.985 0.002 286);
+  --sidebar-accent: oklch(0.967 0.003 286);
+  --sidebar-accent-foreground: oklch(0.205 0.016 286);
+  --sidebar-border: oklch(0.922 0.004 286);
+  --sidebar-ring: oklch(0.546 0.245 262.88);
+
+  --radius: 0.625rem;
 }
 
+/* --------------------------------------------------------------------------
+ * Dark theme
+ * ----------------------------------------------------------------------- */
+.dark {
+  --background: oklch(0.105 0.012 286);
+  --foreground: oklch(0.945 0.004 286);
+
+  --card: oklch(0.13 0.012 286);
+  --card-foreground: oklch(0.945 0.004 286);
+
+  --popover: oklch(0.13 0.012 286);
+  --popover-foreground: oklch(0.945 0.004 286);
+
+  --primary: oklch(0.686 0.196 262.88);
+  --primary-foreground: oklch(0.105 0.012 286);
+
+  --secondary: oklch(0.195 0.014 286);
+  --secondary-foreground: oklch(0.885 0.004 286);
+
+  --muted: oklch(0.195 0.014 286);
+  --muted-foreground: oklch(0.556 0.016 286);
+
+  --accent: oklch(0.556 0.15 256);
+  --accent-foreground: oklch(0.945 0.004 286);
+
+  --destructive: oklch(0.645 0.246 16);
+  --destructive-foreground: oklch(0.105 0.012 286);
+
+  --border: oklch(0.22 0.012 286);
+  --input: oklch(0.22 0.012 286);
+  --ring: oklch(0.686 0.196 262.88);
+
+  --chart-1: oklch(0.686 0.196 262.88);
+  --chart-2: oklch(0.556 0.15 256);
+  --chart-3: oklch(0.696 0.17 149);
+  --chart-4: oklch(0.75 0.145 75);
+  --chart-5: oklch(0.7 0.2 16);
+
+  /* Sidebar tokens — dark */
+  --sidebar: oklch(0.12 0.012 286);
+  --sidebar-foreground: oklch(0.756 0.006 286);
+  --sidebar-primary: oklch(0.686 0.196 262.88);
+  --sidebar-primary-foreground: oklch(0.105 0.012 286);
+  --sidebar-accent: oklch(0.195 0.014 286);
+  --sidebar-accent-foreground: oklch(0.885 0.004 286);
+  --sidebar-border: oklch(0.22 0.012 286);
+  --sidebar-ring: oklch(0.686 0.196 262.88);
+}
+
+/* --------------------------------------------------------------------------
+ * Tailwind v4 @theme inline — maps CSS vars to utility classes
+ * ----------------------------------------------------------------------- */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* --------------------------------------------------------------------------
+ * Base
+ * ----------------------------------------------------------------------- */
+* {
+  border-color: var(--border);
+}
+
+/* Reset native form control backgrounds (macOS Safari/Chrome) */
+input:not([type="checkbox"]):not([type="radio"]),
+textarea,
+select {
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: #fff;
+}
+
+.dark input:not([type="checkbox"]):not([type="radio"]),
+.dark textarea,
+.dark select {
+  background-color: oklch(0.22 0.012 286 / 0.3);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* --------------------------------------------------------------------------
+ * Animations
+ * ----------------------------------------------------------------------- */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-dot {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.4);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@utility animate-fade-in {
+  animation: fadeIn 0.4s ease-out both;
+}
+
+@utility animate-slide-up {
+  animation: slideUp 0.5s ease-out both;
+}
+
+@utility animate-pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+/* --------------------------------------------------------------------------
+ * Premium heading tracking
+ * ----------------------------------------------------------------------- */
+h1, h2, h3 {
+  letter-spacing: -0.025em;
+}
+
+/* --------------------------------------------------------------------------
+ * Scrollbar — minimal, only on hover
+ * ----------------------------------------------------------------------- */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: oklch(0.7 0 0 / 0.25);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.5 0 0 / 0.35);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: oklch(0.4 0 0 / 0.3);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.5 0 0 / 0.4);
+}
+
+/* --------------------------------------------------------------------------
+ * Selection
+ * ----------------------------------------------------------------------- */
+::selection {
+  background: oklch(0.546 0.245 262.88 / 0.15);
+}
+
+.dark ::selection {
+  background: oklch(0.686 0.196 262.88 / 0.25);
+}
+
+/* --------------------------------------------------------------------------
+ * Focus ring — consistent across all interactive elements
+ * ----------------------------------------------------------------------- */
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
 }
