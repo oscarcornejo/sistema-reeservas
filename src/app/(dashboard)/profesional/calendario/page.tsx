@@ -323,6 +323,8 @@ export default function ProfessionalCalendarPage() {
                             <CalendarWidget
                                 mode="single"
                                 selected={selectedDate}
+                                month={selectedDate}
+                                onMonthChange={setSelectedDate}
                                 onSelect={(date) => date && setSelectedDate(date)}
                                 className="rounded-md"
                             />
