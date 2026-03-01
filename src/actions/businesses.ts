@@ -75,7 +75,13 @@ export async function deleteBusiness(
 
         // Invalidar cache
         updateTag(`business-${businessId}`);
+        updateTag(`business-slug-${business.slug}`);
+        updateTag('public-business');
         updateTag('public-services');
+        updateTag('public-professionals');
+        updateTag('professionals');
+        updateTag('clients');
+        updateTag('dashboard-metrics');
 
         return { success: true };
     } catch (error) {

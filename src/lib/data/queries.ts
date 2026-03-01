@@ -6,22 +6,24 @@
 
 import { cacheLife, cacheTag } from 'next/cache';
 import { connectDB } from '@/lib/db/connection';
-import { Appointment, Service, Professional, Client } from '@/lib/db/models';
+import { Appointment, Business, Service, Professional, Client } from '@/lib/db/models';
 import { startOfDay, endOfDay } from 'date-fns';
 import { serialize } from '@/lib/utils';
 
 /**
  * Métricas del dashboard — cacheado por minutos.
  * @param businessId - ID del negocio (se extrae de sesión en el componente padre)
+ * @param todayISO - Fecha actual en ISO string (pasada desde fuera para evitar
+ *   `new Date()` dentro de `use cache`, que congela el valor al momento del cacheo)
  */
-export async function getCachedDashboardMetrics(businessId: string) {
+export async function getCachedDashboardMetrics(businessId: string, todayISO: string) {
     'use cache';
     cacheLife('minutes');
     cacheTag('dashboard-metrics', `business-${businessId}`);
 
     await connectDB();
 
-    const today = new Date();
+    const today = new Date(todayISO);
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
     const nextWeek = new Date(today);
@@ -89,7 +91,6 @@ export async function getCachedPublicServices(businessSlug: string) {
 
     await connectDB();
 
-    const { default: Business } = await import('@/lib/db/models/business');
     const business = await Business.findOne({
         slug: businessSlug,
         isPublished: true,
@@ -118,7 +119,6 @@ export async function getCachedPublicBusiness(businessSlug: string) {
 
     await connectDB();
 
-    const { default: Business } = await import('@/lib/db/models/business');
     const business = await Business.findOne({
         slug: businessSlug,
         isPublished: true,
@@ -140,7 +140,6 @@ export async function getCachedPublicProfessionals(businessSlug: string) {
 
     await connectDB();
 
-    const { default: Business } = await import('@/lib/db/models/business');
     const business = await Business.findOne({
         slug: businessSlug,
         isPublished: true,

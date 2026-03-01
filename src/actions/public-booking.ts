@@ -7,6 +7,7 @@
 'use server';
 
 import { headers } from 'next/headers';
+import { updateTag } from 'next/cache';
 import { connectDB } from '@/lib/db/connection';
 import { Appointment, Service, Professional, Client, Business, ScheduleBlock } from '@/lib/db/models';
 import { publicBookingSchema } from '@/lib/validators/schemas';
@@ -145,6 +146,10 @@ export async function createPublicBooking(
             paymentAmount: service.price,
             clientNotes: parsed.data.clientNotes,
         });
+
+        // Invalidar cache de métricas y clientes
+        updateTag('dashboard-metrics');
+        updateTag('clients');
 
         // Notificaciones (fire-and-forget — no bloquea la respuesta)
         sendBookingNotifications({

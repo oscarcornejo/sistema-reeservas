@@ -62,6 +62,8 @@ export async function updateBusinessSettings(
         );
 
         updateTag(`business-${business._id}`);
+        updateTag(`business-slug-${business.slug}`);
+        updateTag('public-business');
         updateTag('public-services');
 
         return { success: true };
@@ -126,6 +128,8 @@ export async function updateBusinessLocation(
         );
 
         updateTag(`business-${business._id}`);
+        updateTag(`business-slug-${business.slug}`);
+        updateTag('public-business');
         updateTag('public-services');
 
         return { success: true };
@@ -161,6 +165,8 @@ export async function updateWorkingHours(
         );
 
         updateTag(`business-${business._id}`);
+        updateTag(`business-slug-${business.slug}`);
+        updateTag('public-business');
 
         return { success: true };
     } catch (error) {
@@ -204,6 +210,8 @@ export async function updateBusinessPreferences(
         );
 
         updateTag(`business-${business._id}`);
+        updateTag(`business-slug-${business.slug}`);
+        updateTag('public-business');
         updateTag('public-services');
 
         return { success: true };

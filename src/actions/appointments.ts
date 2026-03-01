@@ -103,6 +103,9 @@ export async function createAppointment(
             clientNotes: parsed.data.clientNotes,
         });
 
+        updateTag('dashboard-metrics');
+        updateTag('clients');
+
         return {
             success: true,
             data: { appointmentId: appointment._id.toString() },
@@ -256,6 +259,7 @@ export async function rescheduleAppointment(
         });
 
         updateTag('dashboard-metrics');
+        updateTag('clients');
 
         // Notificaciones fire-and-forget
         sendRescheduleNotifications({
@@ -336,6 +340,7 @@ export async function cancelAppointment(
         });
 
         updateTag('dashboard-metrics');
+        updateTag('clients');
 
         // Notificaciones fire-and-forget
         sendCancellationNotifications({

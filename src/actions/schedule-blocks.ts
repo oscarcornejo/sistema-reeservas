@@ -200,6 +200,7 @@ export async function createScheduleBlock(
         }
 
         updateTag('dashboard-metrics');
+        updateTag('clients');
 
         // Notificaciones fire-and-forget
         const profData = affectedAppointments[0]?.professionalId as unknown as { displayName: string; userId?: { toString(): string } } | undefined;
@@ -288,6 +289,7 @@ export async function removeScheduleBlock(
         await block.save();
 
         updateTag('dashboard-metrics');
+        updateTag('clients');
 
         // Notificaciones fire-and-forget
         sendUnblockNotifications({

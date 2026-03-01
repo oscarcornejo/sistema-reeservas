@@ -5,6 +5,7 @@
 
 'use server';
 
+import { updateTag } from 'next/cache';
 import { connectDB } from '@/lib/db/connection';
 import { Service } from '@/lib/db/models';
 import { getUserBusiness } from '@/lib/auth/dal';
@@ -67,6 +68,9 @@ export async function createService(
             currency: business.currency,
             order: (lastService?.order ?? 0) + 1,
         });
+
+        updateTag('public-services');
+        updateTag(`business-slug-${business.slug}`);
 
         return { success: true, data: { serviceId: service._id.toString() } };
     } catch (error) {
@@ -169,6 +173,9 @@ export async function updateService(
             return { success: false, error: 'Servicio no encontrado' };
         }
 
+        updateTag('public-services');
+        updateTag(`business-slug-${business.slug}`);
+
         return { success: true };
     } catch (error) {
         console.error('Error actualizando servicio:', error);
@@ -192,6 +199,9 @@ export async function deleteService(serviceId: string): Promise<ActionResult> {
             { _id: serviceId, businessId: business._id },
             { isActive: false }
         );
+
+        updateTag('public-services');
+        updateTag(`business-slug-${business.slug}`);
 
         return { success: true };
     } catch (error) {

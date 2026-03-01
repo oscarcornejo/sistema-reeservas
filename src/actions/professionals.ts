@@ -6,6 +6,7 @@
 
 'use server';
 
+import { updateTag } from 'next/cache';
 import { connectDB } from '@/lib/db/connection';
 import { User, Professional } from '@/lib/db/models';
 import { getUserBusiness } from '@/lib/auth/dal';
@@ -110,6 +111,11 @@ export async function createProfessional(
             bio: parsed.data.bio,
         });
 
+        updateTag('professionals');
+        updateTag('public-professionals');
+        updateTag(`business-${business._id}`);
+        updateTag(`business-slug-${business.slug}`);
+
         return {
             success: true,
             data: { professionalId: professional._id.toString() },
@@ -195,6 +201,11 @@ export async function updateProfessional(
             return { success: false, error: 'Profesional no encontrado' };
         }
 
+        updateTag('professionals');
+        updateTag('public-professionals');
+        updateTag(`business-${business._id}`);
+        updateTag(`business-slug-${business.slug}`);
+
         return { success: true };
     } catch (error) {
         console.error('Error actualizando profesional:', error);
@@ -220,6 +231,11 @@ export async function deleteProfessional(
             { _id: professionalId, businessId: business._id },
             { isActive: false }
         );
+
+        updateTag('professionals');
+        updateTag('public-professionals');
+        updateTag(`business-${business._id}`);
+        updateTag(`business-slug-${business.slug}`);
 
         return { success: true };
     } catch (error) {

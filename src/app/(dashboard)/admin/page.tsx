@@ -90,7 +90,7 @@ async function DashboardContent() {
     ]);
 
     const metrics = business
-        ? await getCachedDashboardMetrics(business._id.toString())
+        ? await getCachedDashboardMetrics(business._id.toString(), new Date().toISOString())
         : { todayAppointments: 0, upcomingAppointments: 0, monthlyRevenue: 0, occupancyRate: 0 };
 
     const firstName = user.name?.split(' ')[0] || 'Admin';
