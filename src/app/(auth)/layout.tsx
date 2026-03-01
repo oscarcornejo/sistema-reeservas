@@ -5,7 +5,7 @@
 
 import { Suspense } from 'react';
 import { CopyrightYear } from '@/components/ui/copyright-year';
-import { Calendar, CheckCircle2, Shield, Zap } from 'lucide-react';
+import { Calendar, CheckCircle2, BarChart3, Bell } from 'lucide-react';
 
 export default function AuthLayout({
     children,
@@ -56,8 +56,8 @@ export default function AuthLayout({
                     <div className="space-y-3">
                         {[
                             { icon: Calendar, text: 'Agenda inteligente con reservas online' },
-                            { icon: Zap, text: 'Recordatorios automáticos para reducir inasistencias' },
-                            { icon: Shield, text: 'Reportes detallados de facturación y ocupación' },
+                            { icon: Bell, text: 'Recordatorios automáticos para reducir inasistencias' },
+                            { icon: BarChart3, text: 'Reportes de facturación y ocupación' },
                             { icon: CheckCircle2, text: 'Gestión completa de clientes y profesionales' },
                         ].map((feature) => (
                             <div key={feature.text} className="flex items-center gap-3">

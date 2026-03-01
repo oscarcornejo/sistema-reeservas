@@ -10,6 +10,7 @@ import { Appointment } from '@/lib/db/models';
 import { getUserBusiness } from '@/lib/auth/dal';
 import { parseISO } from 'date-fns';
 import { serialize } from '@/lib/utils';
+import { canAccess, getPlanName } from '@/lib/utils/plan-limits';
 import type { ActionResult } from '@/types';
 
 /** Estructura de un registro del reporte de facturación */
@@ -42,6 +43,13 @@ export async function getRevenueReport(
     const business = await getUserBusiness();
     if (!business) {
         return { success: false, error: 'Negocio no encontrado' };
+    }
+
+    if (!canAccess(business.subscriptionPlan, 'reports')) {
+        return {
+            success: false,
+            error: `Los reportes requieren el plan ${getPlanName('professional')}. Actualiza tu suscripción para acceder.`,
+        };
     }
 
     try {
@@ -86,6 +94,13 @@ export async function getOccupancyReport(
     const business = await getUserBusiness();
     if (!business) {
         return { success: false, error: 'Negocio no encontrado' };
+    }
+
+    if (!canAccess(business.subscriptionPlan, 'reports')) {
+        return {
+            success: false,
+            error: `Los reportes requieren el plan ${getPlanName('professional')}. Actualiza tu suscripción para acceder.`,
+        };
     }
 
     try {
@@ -161,6 +176,18 @@ export async function exportToCSV(
     data: Record<string, unknown>[],
     filename: string
 ): Promise<ActionResult<string>> {
+    const business = await getUserBusiness();
+    if (!business) {
+        return { success: false, error: 'Negocio no encontrado' };
+    }
+
+    if (!canAccess(business.subscriptionPlan, 'csvExport')) {
+        return {
+            success: false,
+            error: `La exportación CSV requiere el plan ${getPlanName('professional')}. Actualiza tu suscripción para acceder.`,
+        };
+    }
+
     if (!data.length) {
         return { success: false, error: 'No hay datos para exportar' };
     }

@@ -5,11 +5,15 @@
 
 'use server';
 
+import { headers } from 'next/headers';
 import bcrypt from 'bcryptjs';
 import { connectDB } from '@/lib/db/connection';
 import User from '@/lib/db/models/user';
 import { signIn } from '@/lib/auth/auth';
 import { loginSchema, registerSchema } from '@/lib/validators/schemas';
+import { checkRateLimit, getClientIp, RATE_LIMITS } from '@/lib/security/rate-limiter';
+import { authLogger } from '@/lib/logger';
+import { auditLog } from '@/lib/logger/audit';
 import type { ActionResult } from '@/types';
 
 /** Rounds de bcrypt para hashing de contraseña */
@@ -41,6 +45,15 @@ export async function registerUser(formData: FormData): Promise<ActionResult> {
         };
     }
 
+    // Rate limit por IP
+    const headersList = await headers();
+    const ip = getClientIp(headersList);
+    const rateCheck = checkRateLimit(`register-ip:${ip}`, RATE_LIMITS.register);
+    if (!rateCheck.allowed) {
+        auditLog('rate_limit.exceeded', { ip, metadata: { key: `register-ip:${ip}` } });
+        return { success: false, error: 'Demasiados intentos de registro. Intenta de nuevo más tarde' };
+    }
+
     try {
         await connectDB();
 
@@ -49,6 +62,7 @@ export async function registerUser(formData: FormData): Promise<ActionResult> {
             email: parsed.data.email.toLowerCase(),
         });
         if (existingUser) {
+            auditLog('register.failure', { email: parsed.data.email, ip, reason: 'Email duplicado' });
             return { success: false, error: 'Este email ya está registrado' };
         }
 
@@ -64,9 +78,10 @@ export async function registerUser(formData: FormData): Promise<ActionResult> {
             phone: parsed.data.phone,
         });
 
+        auditLog('register.success', { email: parsed.data.email, ip });
         return { success: true };
     } catch (error) {
-        console.error('Error en registro:', error);
+        authLogger.error('Error en registro', error);
         return { success: false, error: 'Error interno del servidor' };
     }
 }
@@ -92,6 +107,15 @@ export async function loginUser(formData: FormData): Promise<ActionResult> {
         };
     }
 
+    // Rate limit por IP
+    const headersList = await headers();
+    const ip = getClientIp(headersList);
+    const rateCheck = checkRateLimit(`login-ip:${ip}`, RATE_LIMITS.auth);
+    if (!rateCheck.allowed) {
+        auditLog('rate_limit.exceeded', { ip, email: parsed.data.email, metadata: { key: `login-ip:${ip}` } });
+        return { success: false, error: 'Demasiados intentos de inicio de sesión. Intenta de nuevo más tarde' };
+    }
+
     try {
         await signIn('credentials', {
             email: parsed.data.email,
@@ -106,6 +130,7 @@ export async function loginUser(formData: FormData): Promise<ActionResult> {
             error instanceof Error &&
             error.message.includes('CredentialsSignin')
         ) {
+            auditLog('login.failure', { email: parsed.data.email, ip, reason: 'CredentialsSignin' });
             return { success: false, error: 'Email o contraseña incorrectos' };
         }
         // Re-lanzar si es un redirect (comportamiento esperado de Auth.js)

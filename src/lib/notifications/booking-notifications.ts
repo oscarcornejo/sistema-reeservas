@@ -63,15 +63,17 @@ export async function sendBookingNotifications(data: BookingNotificationData): P
 
         sendEmail({ to: data.clientEmail, subject, html });
 
-        // 2. Notificación in-app al profesional
-        await Notification.create({
-            recipientId: professional.userId,
-            type: 'new-booking',
-            title: 'Nueva reserva',
-            message: `${data.clientName} reservó ${service.name} para el ${formattedDate} a las ${formattedTime}`,
-            referenceId: data.appointmentId,
-            referenceModel: 'Appointment',
-        });
+        // 2. Notificación in-app al profesional (solo plan enterprise)
+        if (business.subscriptionPlan === 'enterprise') {
+            await Notification.create({
+                recipientId: professional.userId,
+                type: 'new-booking',
+                title: 'Nueva reserva',
+                message: `${data.clientName} reservó ${service.name} para el ${formattedDate} a las ${formattedTime}`,
+                referenceId: data.appointmentId,
+                referenceModel: 'Appointment',
+            });
+        }
     } catch (error) {
         console.error('❌ Error enviando notificaciones de reserva:', error);
     }
@@ -131,28 +133,29 @@ export async function sendRescheduleNotifications(data: RescheduleNotificationDa
         });
         sendEmail({ to: data.clientEmail, subject, html });
 
-        // In-app al profesional (si no es el actor)
-        if (data.professionalUserId && data.professionalUserId !== data.actorId) {
-            await Notification.create({
-                recipientId: data.professionalUserId,
-                type: 'booking-rescheduled',
-                title: 'Cita reagendada',
-                message: `La cita de ${data.clientName} (${data.serviceName}) fue reagendada al ${newDate} a las ${newTime}`,
-                referenceId: data.appointmentId,
-                referenceModel: 'Appointment',
-            });
-        }
+        // In-app al profesional y cliente (solo plan enterprise)
+        if (business.subscriptionPlan === 'enterprise') {
+            if (data.professionalUserId && data.professionalUserId !== data.actorId) {
+                await Notification.create({
+                    recipientId: data.professionalUserId,
+                    type: 'booking-rescheduled',
+                    title: 'Cita reagendada',
+                    message: `La cita de ${data.clientName} (${data.serviceName}) fue reagendada al ${newDate} a las ${newTime}`,
+                    referenceId: data.appointmentId,
+                    referenceModel: 'Appointment',
+                });
+            }
 
-        // In-app al cliente (si no es el actor)
-        if (data.clientUserId && data.clientUserId !== data.actorId) {
-            await Notification.create({
-                recipientId: data.clientUserId,
-                type: 'booking-rescheduled',
-                title: 'Cita reagendada',
-                message: `Tu cita de ${data.serviceName} fue reagendada al ${newDate} a las ${newTime}`,
-                referenceId: data.appointmentId,
-                referenceModel: 'Appointment',
-            });
+            if (data.clientUserId && data.clientUserId !== data.actorId) {
+                await Notification.create({
+                    recipientId: data.clientUserId,
+                    type: 'booking-rescheduled',
+                    title: 'Cita reagendada',
+                    message: `Tu cita de ${data.serviceName} fue reagendada al ${newDate} a las ${newTime}`,
+                    referenceId: data.appointmentId,
+                    referenceModel: 'Appointment',
+                });
+            }
         }
     } catch (error) {
         console.error('❌ Error enviando notificaciones de reagendamiento:', error);
@@ -209,28 +212,29 @@ export async function sendCancellationNotifications(data: CancellationNotificati
         });
         sendEmail({ to: data.clientEmail, subject, html });
 
-        // In-app al profesional (si no es el actor)
-        if (data.professionalUserId && data.professionalUserId !== data.actorId) {
-            await Notification.create({
-                recipientId: data.professionalUserId,
-                type: 'booking-cancelled',
-                title: 'Cita cancelada',
-                message: `La cita de ${data.clientName} (${data.serviceName}) del ${formattedDate} fue cancelada`,
-                referenceId: data.appointmentId,
-                referenceModel: 'Appointment',
-            });
-        }
+        // In-app al profesional y cliente (solo plan enterprise)
+        if (business.subscriptionPlan === 'enterprise') {
+            if (data.professionalUserId && data.professionalUserId !== data.actorId) {
+                await Notification.create({
+                    recipientId: data.professionalUserId,
+                    type: 'booking-cancelled',
+                    title: 'Cita cancelada',
+                    message: `La cita de ${data.clientName} (${data.serviceName}) del ${formattedDate} fue cancelada`,
+                    referenceId: data.appointmentId,
+                    referenceModel: 'Appointment',
+                });
+            }
 
-        // In-app al cliente (si no es el actor)
-        if (data.clientUserId && data.clientUserId !== data.actorId) {
-            await Notification.create({
-                recipientId: data.clientUserId,
-                type: 'booking-cancelled',
-                title: 'Cita cancelada',
-                message: `Tu cita de ${data.serviceName} del ${formattedDate} fue cancelada`,
-                referenceId: data.appointmentId,
-                referenceModel: 'Appointment',
-            });
+            if (data.clientUserId && data.clientUserId !== data.actorId) {
+                await Notification.create({
+                    recipientId: data.clientUserId,
+                    type: 'booking-cancelled',
+                    title: 'Cita cancelada',
+                    message: `Tu cita de ${data.serviceName} del ${formattedDate} fue cancelada`,
+                    referenceId: data.appointmentId,
+                    referenceModel: 'Appointment',
+                });
+            }
         }
     } catch (error) {
         console.error('❌ Error enviando notificaciones de cancelación:', error);

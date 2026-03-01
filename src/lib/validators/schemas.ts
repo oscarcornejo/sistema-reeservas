@@ -223,6 +223,17 @@ export const removeScheduleBlockSchema = z.object({
 });
 
 // =============================================================================
+// Suscripciones
+// =============================================================================
+
+/** Schema para crear una suscripción */
+export const createSubscriptionSchema = z.object({
+    plan: z.enum(['starter', 'professional', 'enterprise'], {
+        error: 'Selecciona un plan válido',
+    }),
+});
+
+// =============================================================================
 // Perfil de usuario
 // =============================================================================
 
@@ -281,3 +292,4 @@ export type RescheduleAppointmentInput = z.infer<typeof rescheduleAppointmentSch
 export type CancelAppointmentInput = z.infer<typeof cancelAppointmentSchema>;
 export type CreateScheduleBlockInput = z.infer<typeof createScheduleBlockSchema>;
 export type RemoveScheduleBlockInput = z.infer<typeof removeScheduleBlockSchema>;
+export type CreateSubscriptionInput = z.infer<typeof createSubscriptionSchema>;

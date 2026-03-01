@@ -12,6 +12,7 @@ import { createScheduleBlockSchema, removeScheduleBlockSchema } from '@/lib/vali
 import { addDays, addMonths, parseISO, startOfDay, endOfDay } from 'date-fns';
 import { updateTag } from 'next/cache';
 import { serialize } from '@/lib/utils';
+import { canAccess, getPlanName } from '@/lib/utils/plan-limits';
 import { sendBlockNotifications, sendUnblockNotifications } from '@/lib/notifications/block-notifications';
 import type { ActionResult, IScheduleBlockSerialized } from '@/types';
 
@@ -115,15 +116,30 @@ export async function createScheduleBlock(
             return { success: false, error: 'Profesional no encontrado' };
         }
 
-        // Verificar autorización por rol
+        // Verificar autorización por rol y restricción por plan
         if (user.role === 'admin') {
             const business = await getUserBusiness();
             if (!business || professional.businessId.toString() !== business._id.toString()) {
                 return { success: false, error: 'No tienes permiso para bloquear la agenda de este profesional' };
             }
+            if (!canAccess(business.subscriptionPlan, 'scheduleBlocks')) {
+                return {
+                    success: false,
+                    error: `El bloqueo de agenda requiere el plan ${getPlanName('professional')}. Actualiza tu suscripción para acceder.`,
+                };
+            }
         } else if (user.role === 'professional') {
             if (professional.userId.toString() !== user.id) {
                 return { success: false, error: 'Solo puedes bloquear tu propia agenda' };
+            }
+            // Verificar plan del negocio del profesional
+            const { default: Business } = await import('@/lib/db/models/business');
+            const business = await Business.findById(professional.businessId).lean();
+            if (business && !canAccess(business.subscriptionPlan, 'scheduleBlocks')) {
+                return {
+                    success: false,
+                    error: `El bloqueo de agenda requiere el plan ${getPlanName('professional')}. Contacta al administrador de tu negocio.`,
+                };
             }
         } else {
             return { success: false, error: 'No tienes permiso para bloquear agendas' };

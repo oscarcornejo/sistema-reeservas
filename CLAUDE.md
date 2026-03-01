@@ -12,7 +12,7 @@ TurnoPro — a SaaS appointment/booking management platform for service business
 npm run dev        # Start Next.js dev server
 npm run build      # Production build
 npm run lint       # ESLint
-npx tsx scripts/seed.ts  # Seed MongoDB with test data
+npm run seed       # Seed MongoDB with test data
 ```
 
 > **Note:** `package.json` currently only lists `next`, `react`, `react-dom` as dependencies. All other packages (mongoose, next-auth, zod, zustand, etc.) are installed in `node_modules` / `package-lock.json` but **not yet added to package.json**. Run `npm install --legacy-peer-deps` to restore from the lock file.
@@ -38,9 +38,9 @@ npx tsx scripts/seed.ts  # Seed MongoDB with test data
 ### Route Groups & Layouts
 - `(auth)/` — public auth pages (login, registro) with branded 2-column layout
 - `(dashboard)/` — protected pages with role-aware sidebar layout
-  - `/admin/*` — business admin (requires `admin` role) — **fully implemented** (dashboard, calendario, clientes, servicios, profesionales, reportes, configuracion, negocios)
-  - `/profesional/*` — professional (requires `professional` role) — **stub page only**, sub-pages referenced in Sidebar don't exist yet
-  - `/cliente/*` — client (requires `client` role) — **stub page only**, sub-pages referenced in Sidebar don't exist yet
+  - `/admin/*` — business admin (requires `admin` role) — dashboard, calendario, clientes, servicios, profesionales, reportes, configuracion, negocios
+  - `/profesional/*` — professional (requires `professional` role) — dashboard + calendario
+  - `/cliente/*` — client (requires `client` role) — dashboard + mis-citas
 - `/buscar` — public search page — currently uses **hardcoded sample data**, not connected to DB
 - `/negocio/[slug]` — public business profile — fully connected to cached DB queries + booking dialog
 - `/perfil` — shared profile edit page (all roles)
@@ -59,7 +59,7 @@ All server actions follow this pattern:
 3. Call `connectDB()` then Mongoose operations
 4. Return `ActionResult<T>` — `{ success: boolean; data?: T; error?: string }`
 
-Action files: `auth.ts`, `appointments.ts`, `services.ts`, `business.ts`, `businesses.ts`, `profile.ts`, `public-booking.ts`, `reports.ts`, `notifications.ts`
+Action files: `auth.ts`, `appointments.ts`, `services.ts`, `service-categories.ts`, `business.ts`, `businesses.ts`, `professionals.ts`, `profile.ts`, `public-booking.ts`, `reports.ts`, `notifications.ts`, `schedule-blocks.ts`
 
 ### Cached Data Queries
 - Cached data queries live in `src/lib/data/queries.ts` — use `'use cache'` + `cacheLife()` + `cacheTag()`
@@ -70,7 +70,7 @@ Action files: `auth.ts`, `appointments.ts`, `services.ts`, `business.ts`, `busin
 
 ### Data Layer
 - DB connection in `src/lib/db/connection.ts` — singleton via `globalThis.mongooseCache`, `maxPoolSize: 10`
-- Models in `src/lib/db/models/`: `user`, `business`, `professional`, `client`, `service`, `appointment`, `subscription`, `notification`
+- Models in `src/lib/db/models/`: `user`, `business`, `professional`, `client`, `service`, `service-category`, `appointment`, `subscription`, `notification`, `schedule-block`
 - All models use singleton pattern (`mongoose.models.X || mongoose.model(...)`)
 - All models have `toJSON` transform: `_id` → `id`, strips `__v`/`password`/`mfaSecret`
 - All read queries use `.lean()` for performance
@@ -96,7 +96,7 @@ Action files: `auth.ts`, `appointments.ts`, `services.ts`, `business.ts`, `busin
 ### UI Components
 - shadcn/ui components in `src/components/ui/` — add new ones via `npx shadcn@latest add <component>` (style: `new-york`, icon library: `lucide`)
 - Custom layout components in `src/components/layout/` (`Sidebar`, `TopNavbar`, `PublicNavbar`, `ThemeToggle`, `NotificationBell`)
-- Booking components in `src/components/booking/` (`BookingDialog`, `BookingWrapper`)
+- Booking components in `src/components/booking/` (`BookingDialog`, `BookingWrapper`, `AppointmentDetailDialog`, `RescheduleDialog`, `CancelDialog`, `ScheduleBlockDialog`, `UnblockDialog`)
 
 ### Error Boundaries
 - `src/app/global-error.tsx` — root error boundary (includes `<html>`/`<body>`)

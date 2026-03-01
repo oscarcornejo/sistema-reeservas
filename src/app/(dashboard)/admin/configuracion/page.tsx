@@ -40,6 +40,7 @@ import {
 } from '@/actions/business';
 import { DAYS_OF_WEEK, BUSINESS_CATEGORIES } from '@/lib/utils/format';
 import { toast } from 'sonner';
+import { canAccess } from '@/lib/utils/plan-limits';
 import type { IBusiness, WorkingHour } from '@/types';
 
 /** Horarios por defecto para los 7 días */
@@ -529,45 +530,85 @@ export default function ConfiguracionPage() {
                                     </div>
                                 </div>
 
-                                <div className="space-y-4 pt-2">
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <p className="text-sm font-medium">Pagos en línea</p>
-                                            <p className="text-xs text-muted-foreground">
-                                                Permitir que los clientes paguen al reservar
-                                            </p>
-                                        </div>
-                                        <SwitchWithHidden
-                                            name="allowOnlinePayments"
-                                            defaultChecked={business.allowOnlinePayments}
-                                        />
-                                    </div>
+                                {canAccess(business.subscriptionPlan, 'advancedConfig') ? (
+                                    <>
+                                        <div className="space-y-4 pt-2">
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <p className="text-sm font-medium">Pagos en línea</p>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        Permitir que los clientes paguen al reservar
+                                                    </p>
+                                                </div>
+                                                <SwitchWithHidden
+                                                    name="allowOnlinePayments"
+                                                    defaultChecked={business.allowOnlinePayments}
+                                                />
+                                            </div>
 
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <p className="text-sm font-medium">Pago anticipado requerido</p>
-                                            <p className="text-xs text-muted-foreground">
-                                                Exigir pago al momento de agendar la cita
-                                            </p>
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <p className="text-sm font-medium">Pago anticipado requerido</p>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        Exigir pago al momento de agendar la cita
+                                                    </p>
+                                                </div>
+                                                <SwitchWithHidden
+                                                    name="requirePaymentUpfront"
+                                                    defaultChecked={business.requirePaymentUpfront}
+                                                />
+                                            </div>
                                         </div>
-                                        <SwitchWithHidden
-                                            name="requirePaymentUpfront"
-                                            defaultChecked={business.requirePaymentUpfront}
-                                        />
-                                    </div>
-                                </div>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="cancellationPolicy">Política de cancelación</Label>
-                                    <Textarea
-                                        id="cancellationPolicy"
-                                        name="cancellationPolicy"
-                                        defaultValue={business.cancellationPolicy || ''}
-                                        rows={3}
-                                        placeholder="Ej: Las cancelaciones deben realizarse con al menos 24 horas de anticipación..."
-                                    />
-                                    <p className="text-xs text-muted-foreground">Máximo 500 caracteres</p>
-                                </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="cancellationPolicy">Política de cancelación</Label>
+                                            <Textarea
+                                                id="cancellationPolicy"
+                                                name="cancellationPolicy"
+                                                defaultValue={business.cancellationPolicy || ''}
+                                                rows={3}
+                                                placeholder="Ej: Las cancelaciones deben realizarse con al menos 24 horas de anticipación..."
+                                            />
+                                            <p className="text-xs text-muted-foreground">Máximo 500 caracteres</p>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="space-y-4 pt-2 opacity-60">
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <p className="text-sm font-medium">Pagos en línea</p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    Permitir que los clientes paguen al reservar
+                                                </p>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <Badge variant="secondary" className="text-[10px]">Plan Corporativo</Badge>
+                                                <Switch disabled />
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <p className="text-sm font-medium">Pago anticipado requerido</p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    Exigir pago al momento de agendar la cita
+                                                </p>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <Badge variant="secondary" className="text-[10px]">Plan Corporativo</Badge>
+                                                <Switch disabled />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label>Política de cancelación</Label>
+                                            <Textarea disabled rows={3} placeholder="Disponible en el plan Corporativo..." />
+                                            <Badge variant="secondary" className="text-[10px]">Plan Corporativo</Badge>
+                                        </div>
+                                        {/* Campos ocultos para mantener valores actuales */}
+                                        <input type="hidden" name="allowOnlinePayments" value="false" />
+                                        <input type="hidden" name="requirePaymentUpfront" value="false" />
+                                        <input type="hidden" name="cancellationPolicy" value={business.cancellationPolicy || ''} />
+                                    </div>
+                                )}
 
                                 {/* Campo oculto para isPublished — mantener valor actual */}
                                 <input

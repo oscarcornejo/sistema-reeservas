@@ -6,18 +6,34 @@
 import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth/auth';
+import { getUserBusiness } from '@/lib/auth/dal';
 import Sidebar from '@/components/layout/Sidebar';
 import TopNavbar from '@/components/layout/TopNavbar';
-import type { UserRole } from '@/types';
+import type { UserRole, SubscriptionPlan } from '@/types';
 
 /** Construir objeto user a partir de la sesión de auth */
-function buildUserFromSession(session: { user: { name?: string | null; email?: string | null; role?: string; image?: string | null } }) {
+function buildUserFromSession(
+    session: { user: { name?: string | null; email?: string | null; role?: string; image?: string | null } },
+    subscriptionPlan?: SubscriptionPlan
+) {
     return {
         name: session.user.name || 'Usuario',
         email: session.user.email || '',
         role: session.user.role as UserRole,
         image: session.user.image,
+        subscriptionPlan,
     };
+}
+
+/** Obtener plan de suscripción del admin (si aplica) */
+async function getAdminPlan(role: string): Promise<SubscriptionPlan | undefined> {
+    if (role !== 'admin') return undefined;
+    try {
+        const business = await getUserBusiness();
+        return business?.subscriptionPlan;
+    } catch {
+        return undefined;
+    }
 }
 
 /** Sidebar con auth — componente async dentro de Suspense */
@@ -27,7 +43,8 @@ async function AuthSidebar() {
         redirect('/login');
     }
 
-    return <Sidebar user={buildUserFromSession(session)} />;
+    const plan = await getAdminPlan(session.user.role as string);
+    return <Sidebar user={buildUserFromSession(session, plan)} />;
 }
 
 /** TopNavbar con auth — componente async dentro de Suspense */
@@ -35,7 +52,8 @@ async function AuthTopNavbar() {
     const session = await auth();
     if (!session?.user) return null;
 
-    return <TopNavbar user={buildUserFromSession(session)} />;
+    const plan = await getAdminPlan(session.user.role as string);
+    return <TopNavbar user={buildUserFromSession(session, plan)} />;
 }
 
 export default function DashboardLayout({

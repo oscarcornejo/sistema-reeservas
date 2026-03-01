@@ -12,6 +12,8 @@ import { User } from '@/lib/db/models';
 import { requireAuth } from '@/lib/auth/dal';
 import { profileSchema, changePasswordSchema } from '@/lib/validators/schemas';
 import { serialize } from '@/lib/utils';
+import { auditLogger } from '@/lib/logger';
+import { auditLog } from '@/lib/logger/audit';
 import type { ActionResult, UserRole, SupportedLocale } from '@/types';
 
 /** Rounds de bcrypt para hashing */
@@ -69,7 +71,7 @@ export async function getProfile(): Promise<ActionResult<UserProfile>> {
 
         return { success: true, data: profile };
     } catch (error) {
-        console.error('Error obteniendo perfil:', error);
+        auditLogger.error('Error obteniendo perfil', error);
         return { success: false, error: 'Error al obtener el perfil' };
     }
 }
@@ -120,9 +122,10 @@ export async function updateProfile(
             return { success: false, error: 'Usuario no encontrado' };
         }
 
+        auditLog('profile.update', { userId: user.id, email: user.email });
         return { success: true };
     } catch (error) {
-        console.error('Error actualizando perfil:', error);
+        auditLogger.error('Error actualizando perfil', error);
         return { success: false, error: 'Error al actualizar el perfil' };
     }
 }
@@ -159,6 +162,7 @@ export async function changePassword(
         // Verificar contraseña actual
         const isValid = await bcrypt.compare(parsed.data.currentPassword, dbUser.password);
         if (!isValid) {
+            auditLog('password.change', { userId: user.id, email: user.email, reason: 'Contraseña actual incorrecta' });
             return { success: false, error: 'La contraseña actual es incorrecta' };
         }
 
@@ -167,9 +171,10 @@ export async function changePassword(
         dbUser.password = hashedPassword;
         await dbUser.save();
 
+        auditLog('password.change', { userId: user.id, email: user.email });
         return { success: true };
     } catch (error) {
-        console.error('Error cambiando contraseña:', error);
+        auditLogger.error('Error cambiando contraseña', error);
         return { success: false, error: 'Error al cambiar la contraseña' };
     }
 }
@@ -226,9 +231,10 @@ export async function updateAvatar(
             $set: { avatar: uploadResult.secure_url },
         });
 
+        auditLog('avatar.update', { userId: user.id, email: user.email });
         return { success: true, data: { avatarUrl: uploadResult.secure_url } };
     } catch (error) {
-        console.error('Error actualizando avatar:', error);
+        auditLogger.error('Error actualizando avatar', error);
         return { success: false, error: 'Error al subir la imagen' };
     }
 }
@@ -254,9 +260,10 @@ export async function removeAvatar(): Promise<ActionResult> {
             $unset: { avatar: 1 },
         });
 
+        auditLog('avatar.remove', { userId: user.id, email: user.email });
         return { success: true };
     } catch (error) {
-        console.error('Error eliminando avatar:', error);
+        auditLogger.error('Error eliminando avatar', error);
         return { success: false, error: 'Error al eliminar la imagen' };
     }
 }

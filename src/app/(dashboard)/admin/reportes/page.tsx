@@ -6,7 +6,7 @@
 
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useEffect, useTransition } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -31,10 +31,42 @@ import {
     CalendarRange,
 } from 'lucide-react';
 import { getRevenueReport, getOccupancyReport, exportToCSV } from '@/actions/reports';
+import { getCurrentSubscription } from '@/actions/subscriptions';
+import { canAccess } from '@/lib/utils/plan-limits';
 import { formatCurrency } from '@/lib/utils/format';
+import { UpgradeBanner } from '@/components/ui/upgrade-banner';
 import { toast } from 'sonner';
+import type { SubscriptionPlan } from '@/types';
 
 export default function ReportsPage() {
+    const [plan, setPlan] = useState<SubscriptionPlan | null>(null);
+
+    useEffect(() => {
+        getCurrentSubscription().then((result) => {
+            if (result.success && result.data) {
+                setPlan(result.data.businessPlan as SubscriptionPlan);
+            }
+        });
+    }, []);
+
+    if (plan && !canAccess(plan, 'reports')) {
+        return (
+            <div className="space-y-6">
+                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-500/8 via-background to-emerald-500/6 border border-border/50 p-6">
+                    <div className="relative space-y-1">
+                        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-3">
+                            <BarChart3 className="h-7 w-7 text-amber-500" />
+                            Reportes
+                        </h1>
+                        <p className="text-muted-foreground">
+                            Analiza el rendimiento de tu negocio con datos detallados
+                        </p>
+                    </div>
+                </div>
+                <UpgradeBanner requiredPlan="professional" feature="Reportes y análisis" />
+            </div>
+        );
+    }
     const [startDate, setStartDate] = useState(() => {
         const d = new Date();
         d.setDate(1);

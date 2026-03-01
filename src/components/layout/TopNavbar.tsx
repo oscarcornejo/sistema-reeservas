@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { ThemeToggle } from './ThemeToggle';
 import NotificationBell from './NotificationBell';
-import type { UserRole } from '@/types';
+import type { UserRole, SubscriptionPlan } from '@/types';
 
 const ROLE_LABELS: Record<UserRole, string> = {
     admin: 'Administrador',
@@ -35,6 +35,7 @@ interface UserDropdownProps {
         email: string;
         role: UserRole;
         image?: string | null;
+        subscriptionPlan?: SubscriptionPlan;
     };
 }
 
@@ -122,7 +123,7 @@ export default function TopNavbar({ user }: UserDropdownProps) {
             </Link>
             <div className="flex-1 flex justify-end items-center gap-2">
                 <ThemeToggle />
-                <NotificationBell />
+                {user.subscriptionPlan === 'enterprise' && <NotificationBell />}
                 <UserDropdownMenu user={user} />
             </div>
         </nav>

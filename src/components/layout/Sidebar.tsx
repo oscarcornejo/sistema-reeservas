@@ -31,25 +31,27 @@ import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useState } from 'react';
-import type { UserRole } from '@/types';
+import type { UserRole, SubscriptionPlan } from '@/types';
 
 /** Tipo de item de navegación */
 interface NavItem {
     label: string;
     href: string;
     icon: React.ElementType;
+    /** Planes que tienen acceso a este item (solo aplica para admin) */
+    allowedPlans?: SubscriptionPlan[];
 }
 
 /** Items de navegación por rol */
 const NAV_CONFIG: Record<UserRole, NavItem[]> = {
     admin: [
         { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-        { label: 'Negocios', href: '/admin/negocios', icon: Building2 },
+        { label: 'Negocios', href: '/admin/negocios', icon: Building2, allowedPlans: ['enterprise'] },
         { label: 'Calendario', href: '/admin/calendario', icon: Calendar },
         { label: 'Servicios', href: '/admin/servicios', icon: Scissors },
         { label: 'Profesionales', href: '/admin/profesionales', icon: Users },
         { label: 'Clientes', href: '/admin/clientes', icon: UserCircle },
-        { label: 'Reportes', href: '/admin/reportes', icon: BarChart3 },
+        { label: 'Reportes', href: '/admin/reportes', icon: BarChart3, allowedPlans: ['professional', 'enterprise'] },
         { label: 'Suscripción', href: '/admin/suscripcion', icon: CreditCard },
         { label: 'Configuración', href: '/admin/configuracion', icon: Settings },
     ],
@@ -74,6 +76,7 @@ interface SidebarProps {
         email: string;
         role: UserRole;
         image?: string | null;
+        subscriptionPlan?: SubscriptionPlan;
     };
 }
 
@@ -85,7 +88,10 @@ function SidebarContent({
     onNavigate,
 }: SidebarProps & { onNavigate?: () => void }) {
     const pathname = usePathname();
-    const navItems = NAV_CONFIG[user.role];
+    const navItems = NAV_CONFIG[user.role].filter((item) => {
+        if (!item.allowedPlans || user.role !== 'admin') return true;
+        return user.subscriptionPlan ? item.allowedPlans.includes(user.subscriptionPlan) : true;
+    });
 
     const isActive = (href: string) => {
         if (href === '/admin' || href === '/profesional' || href === '/cliente') {

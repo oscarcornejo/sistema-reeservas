@@ -6,11 +6,14 @@
 
 'use server';
 
+import { headers } from 'next/headers';
 import { connectDB } from '@/lib/db/connection';
 import { Appointment, Service, Professional, Client, Business, ScheduleBlock } from '@/lib/db/models';
 import { publicBookingSchema } from '@/lib/validators/schemas';
 import { addMinutes, format, parseISO, startOfDay, endOfDay, isBefore, startOfToday } from 'date-fns';
 import { sendBookingNotifications } from '@/lib/notifications/booking-notifications';
+import { checkRateLimit, getClientIp, RATE_LIMITS } from '@/lib/security/rate-limiter';
+import { appLogger } from '@/lib/logger';
 import type { ActionResult } from '@/types';
 
 /**
@@ -35,6 +38,14 @@ export async function createPublicBooking(
     const parsed = publicBookingSchema.safeParse(rawData);
     if (!parsed.success) {
         return { success: false, error: parsed.error.issues[0].message };
+    }
+
+    // Rate limit por IP
+    const headersList = await headers();
+    const ip = getClientIp(headersList);
+    const rateCheck = checkRateLimit(`booking:${ip}`, RATE_LIMITS.publicBooking);
+    if (!rateCheck.allowed) {
+        return { success: false, error: 'Demasiadas solicitudes. Intenta de nuevo en un momento' };
     }
 
     try {
@@ -154,7 +165,7 @@ export async function createPublicBooking(
             data: { appointmentId: appointment._id.toString() },
         };
     } catch (error) {
-        console.error('Error creando reserva pública:', error);
+        appLogger.error('Error creando reserva pública', error);
         return { success: false, error: 'Error al crear la reserva' };
     }
 }

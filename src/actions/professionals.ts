@@ -11,6 +11,7 @@ import { User, Professional } from '@/lib/db/models';
 import { getUserBusiness } from '@/lib/auth/dal';
 import { professionalSchema } from '@/lib/validators/schemas';
 import { serialize } from '@/lib/utils';
+import { getPlanLimits, getPlanName } from '@/lib/utils/plan-limits';
 import type { ActionResult, IProfessional } from '@/types';
 import bcrypt from 'bcryptjs';
 
@@ -49,6 +50,22 @@ export async function createProfessional(
 
     try {
         await connectDB();
+
+        // Verificar límite de profesionales según el plan
+        const limits = getPlanLimits(business.subscriptionPlan);
+        if (limits.maxProfessionals !== Infinity) {
+            const activeCount = await Professional.countDocuments({
+                businessId: business._id,
+                isActive: true,
+            });
+            if (activeCount >= limits.maxProfessionals) {
+                const planName = getPlanName(business.subscriptionPlan);
+                return {
+                    success: false,
+                    error: `Tu plan ${planName} permite hasta ${limits.maxProfessionals} profesional${limits.maxProfessionals > 1 ? 'es' : ''}. Actualiza tu plan para agregar más.`,
+                };
+            }
+        }
 
         // Buscar si ya existe un usuario con ese email
         let user = await User.findOne({ email: parsed.data.email });

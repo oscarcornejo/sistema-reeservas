@@ -41,12 +41,16 @@ import {
     Loader2,
 } from 'lucide-react';
 import { getAdminBusinesses, deleteBusiness } from '@/actions/businesses';
+import { getCurrentSubscription } from '@/actions/subscriptions';
+import { canAccess } from '@/lib/utils/plan-limits';
 import { formatDate } from '@/lib/utils/format';
+import { UpgradeBanner } from '@/components/ui/upgrade-banner';
 import { toast } from 'sonner';
-import type { IBusiness } from '@/types';
+import type { IBusiness, SubscriptionPlan } from '@/types';
 
 export default function BusinessesPage() {
     const [businesses, setBusinesses] = useState<IBusiness[]>([]);
+    const [plan, setPlan] = useState<SubscriptionPlan | null>(null);
     const [isPending, startTransition] = useTransition();
 
     const loadBusinesses = () => {
@@ -61,6 +65,11 @@ export default function BusinessesPage() {
     };
 
     useEffect(() => {
+        getCurrentSubscription().then((result) => {
+            if (result.success && result.data) {
+                setPlan(result.data.businessPlan as SubscriptionPlan);
+            }
+        });
         loadBusinesses();
     }, []);
 
@@ -99,6 +108,10 @@ export default function BusinessesPage() {
                     </p>
                 </div>
             </div>
+
+            {plan && !canAccess(plan, 'multiBusiness') ? (
+                <UpgradeBanner requiredPlan="enterprise" feature="Gestión multi-negocio" />
+            ) : (<>
 
             {/* ── Stats ── */}
             <div className="grid gap-4 sm:grid-cols-3" style={{ animation: 'fadeIn 0.4s ease-out 0.05s both' }}>
@@ -295,6 +308,7 @@ export default function BusinessesPage() {
                     )}
                 </CardContent>
             </Card>
+            </>)}
         </div>
     );
 }

@@ -10,6 +10,7 @@ import { ServiceCategory, Service } from '@/lib/db/models';
 import { getUserBusiness } from '@/lib/auth/dal';
 import { serviceCategorySchema } from '@/lib/validators/schemas';
 import { serialize } from '@/lib/utils';
+import { canAccess, getPlanName } from '@/lib/utils/plan-limits';
 import type { ActionResult, IServiceCategory } from '@/types';
 
 /**
@@ -47,6 +48,13 @@ export async function createServiceCategory(
     const business = await getUserBusiness();
     if (!business) {
         return { success: false, error: 'Negocio no encontrado' };
+    }
+
+    if (!canAccess(business.subscriptionPlan, 'categories')) {
+        return {
+            success: false,
+            error: `Las categorías personalizadas requieren el plan ${getPlanName('professional')}. Actualiza tu suscripción para acceder.`,
+        };
     }
 
     const rawData = {

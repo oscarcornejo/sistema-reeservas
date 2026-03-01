@@ -10,6 +10,7 @@ import { Service } from '@/lib/db/models';
 import { getUserBusiness } from '@/lib/auth/dal';
 import { serviceSchema } from '@/lib/validators/schemas';
 import { serialize } from '@/lib/utils';
+import { getPlanLimits, getPlanName } from '@/lib/utils/plan-limits';
 import type { ActionResult, IService } from '@/types';
 
 /**
@@ -38,6 +39,22 @@ export async function createService(
 
     try {
         await connectDB();
+
+        // Verificar límite de servicios según el plan
+        const limits = getPlanLimits(business.subscriptionPlan);
+        if (limits.maxServices !== Infinity) {
+            const activeCount = await Service.countDocuments({
+                businessId: business._id,
+                isActive: true,
+            });
+            if (activeCount >= limits.maxServices) {
+                const planName = getPlanName(business.subscriptionPlan);
+                return {
+                    success: false,
+                    error: `Tu plan ${planName} permite hasta ${limits.maxServices} servicio${limits.maxServices > 1 ? 's' : ''}. Actualiza tu plan para agregar más.`,
+                };
+            }
+        }
 
         // Obtener el orden del último servicio para posicionar al final
         const lastService = await Service.findOne({ businessId: business._id })
