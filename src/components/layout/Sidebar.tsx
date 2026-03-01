@@ -121,7 +121,7 @@ function SidebarContent({
                                 key={item.href}
                                 href={item.href}
                                 onClick={onNavigate}
-                                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${active
+                                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${active
                                         ? 'bg-sidebar-accent text-sidebar-primary'
                                         : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
                                     }`}
@@ -164,8 +164,9 @@ function SidebarContent({
                         className="h-8 w-8 text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent"
                         onClick={() => signOut({ callbackUrl: '/' })}
                         title="Cerrar sesión"
+                        aria-label="Cerrar sesión"
                     >
-                        <LogOut className="h-4 w-4" />
+                        <LogOut className="h-4 w-4" aria-hidden="true" />
                     </Button>
                 </div>
             </div>
@@ -189,7 +190,7 @@ export default function Sidebar({ user }: SidebarProps) {
             </aside>
 
             {/* Mobile trigger + sheet */}
-            <div className="lg:hidden fixed top-0 left-0 right-0 z-40 flex h-14 items-center justify-between border-b border-border/40 bg-background/80 backdrop-blur-xl px-4">
+            <div className="lg:hidden fixed top-0 left-0 right-0 z-40 flex h-14 items-center justify-between border-b border-sidebar-border bg-background/80 backdrop-blur-xl px-4">
                 <div className="flex items-center gap-2">
                     <Sheet open={open} onOpenChange={setOpen}>
                         <SheetTrigger asChild>
@@ -202,7 +203,7 @@ export default function Sidebar({ user }: SidebarProps) {
                         </SheetContent>
                     </Sheet>
                     <div className="flex items-center gap-2">
-                        <div className="flex h-7 w-7 items-center justify-center rounded bg-primary text-primary-foreground font-bold text-sm">
+                        <div className="flex h-7 w-7 items-center justify-center rounded bg-sidebar-primary text-sidebar-primary-foreground font-bold text-sm">
                             T
                         </div>
                         <span className="font-semibold text-sm">TurnoPro</span>

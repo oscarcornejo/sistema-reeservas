@@ -52,9 +52,9 @@ const ROLE_INFO = {
         icon: User,
         color: 'blue-500',
         gradient: 'from-blue-500/15 to-blue-500/5',
-        borderActive: 'border-blue-500',
-        textActive: 'text-blue-500',
-        bgActive: 'bg-blue-500/5',
+        borderActive: 'border-blue-500 dark:border-blue-400',
+        textActive: 'text-blue-500 dark:text-blue-400',
+        bgActive: 'bg-blue-500/5 dark:bg-blue-500/15',
     },
     client: {
         label: 'Cliente',
@@ -62,9 +62,9 @@ const ROLE_INFO = {
         icon: CalendarCheck,
         color: 'emerald-500',
         gradient: 'from-emerald-500/15 to-emerald-500/5',
-        borderActive: 'border-emerald-500',
-        textActive: 'text-emerald-500',
-        bgActive: 'bg-emerald-500/5',
+        borderActive: 'border-emerald-500 dark:border-emerald-400',
+        textActive: 'text-emerald-500 dark:text-emerald-400',
+        bgActive: 'bg-emerald-500/5 dark:bg-emerald-500/15',
     },
 };
 
@@ -141,7 +141,7 @@ export default function RegisterPage() {
                                                 key={role}
                                                 type="button"
                                                 onClick={() => setSelectedRole(role)}
-                                                className={`relative flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-center transition-all duration-200 ${
+                                                className={`relative flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-center transition-[border-color,background-color,color] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                                                     isSelected
                                                         ? `${info.borderActive} ${info.bgActive}`
                                                         : 'border-border/60 hover:border-border bg-background hover:bg-muted/30'

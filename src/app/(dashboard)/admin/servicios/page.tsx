@@ -191,22 +191,22 @@ export default function ServicesPage() {
         : 0;
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-8">
             {/* ── Header con banner gradiente ── */}
             <div
                 className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500/8 via-background to-accent/6 border border-border/50 p-6"
                 style={{ animation: 'fadeIn 0.4s ease-out' }}
             >
-                <div className="absolute -top-12 -right-12 h-40 w-40 rounded-full bg-emerald-500/8 blur-3xl" />
+                <div className="absolute -top-12 -right-12 h-40 w-40 rounded-full bg-emerald-500/8 dark:bg-emerald-500/15 blur-3xl" />
                 <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-accent/6 blur-3xl" />
 
                 <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div className="space-y-1">
-                        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-3">
+                        <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
                             {activeTab === 'servicios' ? (
-                                <Scissors className="h-7 w-7 text-emerald-500" />
+                                <Scissors className="h-7 w-7 text-emerald-500 dark:text-emerald-400" />
                             ) : (
-                                <FolderOpen className="h-7 w-7 text-emerald-500" />
+                                <FolderOpen className="h-7 w-7 text-emerald-500 dark:text-emerald-400" />
                             )}
                             {activeTab === 'servicios' ? 'Servicios' : 'Categorías'}
                         </h1>
@@ -381,46 +381,46 @@ export default function ServicesPage() {
                 <TabsContent value="servicios" className="space-y-6">
                     {/* Stats rápidas */}
                     <div className="grid gap-4 sm:grid-cols-3" style={{ animation: 'fadeIn 0.4s ease-out 0.05s both' }}>
-                        <Card className="group relative overflow-hidden border-border/50 hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-300">
+                        <Card className="group relative overflow-hidden border-border/50 hover:shadow-lg hover:shadow-emerald-500/5 dark:hover:shadow-emerald-500/10 transition-[box-shadow] duration-300">
                             <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-emerald-500 to-emerald-400/40" />
                             <CardContent className="p-5">
-                                <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center justify-between mb-3">
                                     <span className="text-sm font-medium text-muted-foreground">Precio promedio</span>
-                                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10 group-hover:bg-emerald-500/15 transition-colors">
-                                        <DollarSign className="h-4.5 w-4.5 text-emerald-500" />
+                                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10 dark:bg-emerald-500/20 group-hover:bg-emerald-500/15 transition-colors">
+                                        <DollarSign className="h-4.5 w-4.5 text-emerald-500 dark:text-emerald-400" />
                                     </div>
                                 </div>
-                                <p className="text-3xl font-bold tracking-tight">
+                                <p className="text-3xl font-bold tracking-tight tabular-nums">
                                     {avgPrice > 0 ? formatCurrency(avgPrice) : '$0'}
                                 </p>
                                 <p className="text-xs text-muted-foreground mt-1">por servicio</p>
                             </CardContent>
                         </Card>
-                        <Card className="group relative overflow-hidden border-border/50 hover:shadow-lg hover:shadow-blue-500/5 transition-all duration-300">
+                        <Card className="group relative overflow-hidden border-border/50 hover:shadow-lg hover:shadow-blue-500/5 dark:hover:shadow-blue-500/10 transition-[box-shadow] duration-300">
                             <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-blue-500 to-blue-400/40" />
                             <CardContent className="p-5">
-                                <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center justify-between mb-3">
                                     <span className="text-sm font-medium text-muted-foreground">Duración promedio</span>
-                                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500/10 group-hover:bg-blue-500/15 transition-colors">
-                                        <Clock className="h-4.5 w-4.5 text-blue-500" />
+                                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500/10 dark:bg-blue-500/20 group-hover:bg-blue-500/15 transition-colors">
+                                        <Clock className="h-4.5 w-4.5 text-blue-500 dark:text-blue-400" />
                                     </div>
                                 </div>
-                                <p className="text-3xl font-bold tracking-tight">
+                                <p className="text-3xl font-bold tracking-tight tabular-nums">
                                     {avgDuration > 0 ? `${avgDuration} min` : '0 min'}
                                 </p>
                                 <p className="text-xs text-muted-foreground mt-1">por sesión</p>
                             </CardContent>
                         </Card>
-                        <Card className="group relative overflow-hidden border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300">
+                        <Card className="group relative overflow-hidden border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-[box-shadow] duration-300">
                             <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-primary to-primary/40" />
                             <CardContent className="p-5">
-                                <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center justify-between mb-3">
                                     <span className="text-sm font-medium text-muted-foreground">Total servicios</span>
                                     <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 group-hover:bg-primary/15 transition-colors">
                                         <Layers className="h-4.5 w-4.5 text-primary" />
                                     </div>
                                 </div>
-                                <p className="text-3xl font-bold tracking-tight">{activeServices.length}</p>
+                                <p className="text-3xl font-bold tracking-tight tabular-nums">{activeServices.length}</p>
                                 <p className="text-xs text-muted-foreground mt-1">activos</p>
                             </CardContent>
                         </Card>
@@ -474,12 +474,12 @@ export default function ServicesPage() {
                                                         </div>
                                                     </TableCell>
                                                     <TableCell>
-                                                        <Badge className="text-[10px] border-0 bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20">
+                                                        <Badge className="text-[10px] border-0 bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20">
                                                             {service.category}
                                                         </Badge>
                                                     </TableCell>
                                                     <TableCell className="text-right">
-                                                        <span className="inline-flex items-center gap-1.5 rounded-md bg-blue-500/8 px-2 py-0.5 text-xs font-medium text-blue-600">
+                                                        <span className="inline-flex items-center gap-1.5 rounded-md bg-blue-500/8 dark:bg-blue-500/15 px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400">
                                                             <Clock className="h-3 w-3" />
                                                             {service.duration} min
                                                         </span>
@@ -494,7 +494,7 @@ export default function ServicesPage() {
                                                             <Button
                                                                 variant="ghost"
                                                                 size="icon"
-                                                                className="h-8 w-8 hover:bg-blue-500/10 hover:text-blue-500"
+                                                                className="h-8 w-8 hover:bg-blue-500/10 dark:hover:bg-blue-500/20 hover:text-blue-500 dark:hover:text-blue-400"
                                                                 onClick={() => {
                                                                     setEditingService(service);
                                                                     setIsDialogOpen(true);
@@ -573,7 +573,7 @@ export default function ServicesPage() {
                                                                 <Button
                                                                     variant="ghost"
                                                                     size="icon"
-                                                                    className="h-8 w-8 hover:bg-blue-500/10 hover:text-blue-500"
+                                                                    className="h-8 w-8 hover:bg-blue-500/10 dark:hover:bg-blue-500/20 hover:text-blue-500 dark:hover:text-blue-400"
                                                                     onClick={() => {
                                                                         setEditingCategory(cat);
                                                                         setIsCategoryDialogOpen(true);

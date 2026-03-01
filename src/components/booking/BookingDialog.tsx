@@ -222,7 +222,7 @@ export default function BookingDialog({
                                     <div key={config.label} className="flex items-center flex-1 last:flex-none">
                                         <div className="flex flex-col items-center gap-1.5">
                                             <div
-                                                className={`flex h-9 w-9 items-center justify-center rounded-xl text-xs font-medium transition-all duration-300 ${
+                                                className={`flex h-9 w-9 items-center justify-center rounded-xl text-xs font-medium transition-[transform,background-color,color] duration-300 ${
                                                     isActive
                                                         ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25 scale-110'
                                                         : isComplete
@@ -241,7 +241,7 @@ export default function BookingDialog({
                                                     ? 'text-foreground'
                                                     : isComplete
                                                         ? 'text-emerald-600 dark:text-emerald-400'
-                                                        : 'text-muted-foreground/40'
+                                                        : 'text-muted-foreground/60'
                                             }`}>
                                                 {config.label}
                                             </span>
@@ -249,7 +249,7 @@ export default function BookingDialog({
                                         {i < 4 && (
                                             <div className="flex-1 mx-1.5 h-[2px] rounded-full overflow-hidden bg-border/50">
                                                 <div
-                                                    className={`h-full rounded-full transition-all duration-500 ease-out ${
+                                                    className={`h-full rounded-full transition-[width] duration-500 ease-out ${
                                                         step > stepNum
                                                             ? 'w-full bg-emerald-500/40'
                                                             : 'w-0 bg-primary'
@@ -337,7 +337,7 @@ export default function BookingDialog({
                         {Array.from({ length: 5 }).map((_, i) => (
                             <div
                                 key={i}
-                                className={`h-1.5 rounded-full transition-all duration-300 ${
+                                className={`h-1.5 rounded-full transition-[width,background-color] duration-300 ${
                                     i + 1 === step
                                         ? 'w-6 bg-primary'
                                         : i + 1 < step
@@ -410,7 +410,7 @@ function StepService({
                         key={id}
                         type="button"
                         onClick={() => onSelect(id)}
-                        className={`w-full text-left rounded-xl border-2 p-4 transition-all duration-200 group ${
+                        className={`w-full text-left rounded-xl border-2 p-4 transition-[border-color,box-shadow,background-color] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 group ${
                             isSelected
                                 ? 'border-primary bg-primary/[0.04] shadow-sm'
                                 : 'border-border/40 hover:border-border hover:bg-muted/30'
@@ -489,7 +489,7 @@ function StepProfessional({
                         key={id}
                         type="button"
                         onClick={() => onSelect(id)}
-                        className={`w-full text-left rounded-xl border-2 p-4 transition-all duration-200 group ${
+                        className={`w-full text-left rounded-xl border-2 p-4 transition-[border-color,box-shadow,background-color] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 group ${
                             isSelected
                                 ? 'border-primary bg-primary/[0.04] shadow-sm'
                                 : 'border-border/40 hover:border-border hover:bg-muted/30'
@@ -497,7 +497,7 @@ function StepProfessional({
                         style={{ animation: `fadeIn 0.3s ease-out ${i * 0.04}s both` }}
                     >
                         <div className="flex items-center gap-3.5">
-                            <div className={`relative flex h-12 w-12 shrink-0 items-center justify-center rounded-xl font-bold text-sm transition-all ${
+                            <div className={`relative flex h-12 w-12 shrink-0 items-center justify-center rounded-xl font-bold text-sm transition-[background-color,color,box-shadow] ${
                                 isSelected
                                     ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20'
                                     : 'bg-muted text-muted-foreground group-hover:bg-muted/80'
@@ -528,7 +528,7 @@ function StepProfessional({
                             </div>
                             {pro.rating > 0 && (
                                 <div className="flex items-center gap-1 text-sm shrink-0">
-                                    <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                                    <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400 dark:fill-amber-300 dark:text-amber-300" />
                                     <span className="font-semibold tabular-nums">{pro.rating.toFixed(1)}</span>
                                 </div>
                             )}
@@ -608,7 +608,7 @@ function StepDateTime({
                                     key={slot}
                                     type="button"
                                     onClick={() => onTimeSelect(slot)}
-                                    className={`rounded-lg border-2 px-3 py-2.5 text-sm font-medium tabular-nums transition-all duration-150 ${
+                                    className={`rounded-lg border-2 px-3 py-2.5 text-sm font-medium tabular-nums transition-[border-color,background-color] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                                         selectedTime === slot
                                             ? 'border-primary bg-primary text-primary-foreground shadow-md shadow-primary/20'
                                             : 'border-border/40 text-foreground hover:border-primary/30 hover:bg-primary/[0.03]'

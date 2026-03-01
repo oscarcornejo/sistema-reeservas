@@ -3,7 +3,7 @@
  * Configura fuentes (Geist), theme provider (next-themes), y Toaster global.
  */
 
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from '@/components/ui/sonner';
@@ -26,6 +26,14 @@ export const metadata: Metadata = {
     },
     description:
         'Plataforma de reservas y gestión de citas para barberías, spas, clínicas y negocios de servicio en Latinoamérica.',
+};
+
+export const viewport: Viewport = {
+    themeColor: [
+        { media: '(prefers-color-scheme: light)', color: '#f9f9fa' },
+        { media: '(prefers-color-scheme: dark)', color: '#0a0a0b' },
+    ],
+    colorScheme: 'light dark',
 };
 
 export default function RootLayout({

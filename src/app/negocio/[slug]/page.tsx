@@ -259,11 +259,11 @@ function InfoSection({ business }: { business: IBusiness }) {
                 <div className="grid gap-8 lg:gap-10 lg:grid-cols-2">
                     {/* Horarios */}
                     <div style={{ animation: 'fadeIn 0.4s ease-out' }}>
-                        <div className="inline-flex items-center gap-2 rounded-full bg-amber-500/8 px-3 py-1 text-xs font-medium text-amber-600 mb-3">
+                        <div className="inline-flex items-center gap-2 rounded-full bg-amber-500/8 dark:bg-amber-500/15 px-3 py-1 text-xs font-medium text-amber-600 dark:text-amber-400 mb-3">
                             <Clock className="h-3 w-3" />
                             Horarios
                         </div>
-                        <h2 className="text-2xl font-bold tracking-tight mb-6">
+                        <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-6">
                             Horarios de atención
                         </h2>
                         <Card className="relative border-border/50 overflow-hidden">
@@ -284,7 +284,7 @@ function InfoSection({ business }: { business: IBusiness }) {
                                                 }`}>
                                                     {DAYS_OF_WEEK[hour.dayOfWeek]}
                                                     {isToday && (
-                                                        <Badge className="ml-2 text-[9px] border-0 bg-primary/10 text-primary py-0">
+                                                        <Badge className="ml-2 text-[10px] border-0 bg-primary/10 text-primary py-0">
                                                             Hoy
                                                         </Badge>
                                                     )}
@@ -319,7 +319,7 @@ function InfoSection({ business }: { business: IBusiness }) {
                             <Phone className="h-3 w-3" />
                             Contacto
                         </div>
-                        <h2 className="text-2xl font-bold tracking-tight mb-6">
+                        <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-6">
                             Contacto
                         </h2>
                         <Card className="relative border-border/50 overflow-hidden">
@@ -335,8 +335,8 @@ function InfoSection({ business }: { business: IBusiness }) {
                                 <Separator className="bg-border/50" />
 
                                 <ContactRow
-                                    icon={<Phone className="h-5 w-5 text-blue-500" />}
-                                    iconBg="bg-blue-500/10"
+                                    icon={<Phone className="h-5 w-5 text-blue-500 dark:text-blue-400" />}
+                                    iconBg="bg-blue-500/10 dark:bg-blue-500/20"
                                     label="Teléfono"
                                     value={business.phone}
                                     href={`tel:${business.phone}`}
@@ -345,8 +345,8 @@ function InfoSection({ business }: { business: IBusiness }) {
                                 <Separator className="bg-border/50" />
 
                                 <ContactRow
-                                    icon={<Mail className="h-5 w-5 text-emerald-500" />}
-                                    iconBg="bg-emerald-500/10"
+                                    icon={<Mail className="h-5 w-5 text-emerald-500 dark:text-emerald-400" />}
+                                    iconBg="bg-emerald-500/10 dark:bg-emerald-500/20"
                                     label="Email"
                                     value={business.email}
                                     href={`mailto:${business.email}`}
@@ -356,8 +356,8 @@ function InfoSection({ business }: { business: IBusiness }) {
                                     <>
                                         <Separator className="bg-border/50" />
                                         <ContactRow
-                                            icon={<Globe className="h-5 w-5 text-amber-500" />}
-                                            iconBg="bg-amber-500/10"
+                                            icon={<Globe className="h-5 w-5 text-amber-500 dark:text-amber-400" />}
+                                            iconBg="bg-amber-500/10 dark:bg-amber-500/20"
                                             label="Sitio web"
                                             value={business.website.replace(/^https?:\/\//, '')}
                                             href={business.website}

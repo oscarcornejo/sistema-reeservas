@@ -89,18 +89,18 @@ export default function BusinessesPage() {
   const drafts = businesses.filter((b) => !b.isPublished);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* ── Header con banner gradiente ── */}
       <div
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-500/8 via-background to-primary/6 border border-border/50 p-6"
+        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-accent/8 via-background to-primary/6 border border-border/50 p-6"
         style={{ animation: "fadeIn 0.4s ease-out" }}
       >
-        <div className="absolute -top-12 -right-12 h-40 w-40 rounded-full bg-purple-500/8 blur-3xl" />
+        <div className="absolute -top-12 -right-12 h-40 w-40 rounded-full bg-accent/8 dark:bg-accent/15 blur-3xl" />
         <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-primary/6 blur-3xl" />
 
         <div className="relative space-y-1">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-3">
-            <Building2 className="h-7 w-7 text-purple-500" />
+          <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
+            <Building2 className="h-7 w-7 text-accent dark:text-accent" />
             Negocios
           </h1>
           <p className="text-muted-foreground">
@@ -121,10 +121,10 @@ export default function BusinessesPage() {
             className="grid gap-4 sm:grid-cols-3"
             style={{ animation: "fadeIn 0.4s ease-out 0.05s both" }}
           >
-            <Card className="group relative overflow-hidden border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300">
+            <Card className="group relative overflow-hidden border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-[box-shadow] duration-300">
               <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-primary to-primary/40" />
               <CardContent className="p-5">
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center justify-between mb-3">
                   <span className="text-sm font-medium text-muted-foreground">
                     Total negocios
                   </span>
@@ -132,7 +132,7 @@ export default function BusinessesPage() {
                     <Building2 className="h-4.5 w-4.5 text-primary" />
                   </div>
                 </div>
-                <p className="text-3xl font-bold tracking-tight">
+                <p className="text-3xl font-bold tracking-tight tabular-nums">
                   {businesses.length}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
@@ -140,18 +140,18 @@ export default function BusinessesPage() {
                 </p>
               </CardContent>
             </Card>
-            <Card className="group relative overflow-hidden border-border/50 hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-300">
+            <Card className="group relative overflow-hidden border-border/50 hover:shadow-lg hover:shadow-emerald-500/5 transition-[box-shadow] duration-300">
               <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-emerald-500 to-emerald-400/40" />
               <CardContent className="p-5">
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center justify-between mb-3">
                   <span className="text-sm font-medium text-muted-foreground">
                     Publicados
                   </span>
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10 group-hover:bg-emerald-500/15 transition-colors">
-                    <Globe className="h-4.5 w-4.5 text-emerald-500" />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10 dark:bg-emerald-500/20 group-hover:bg-emerald-500/15 dark:group-hover:bg-emerald-500/25 transition-colors">
+                    <Globe className="h-4.5 w-4.5 text-emerald-500 dark:text-emerald-400" />
                   </div>
                 </div>
-                <p className="text-3xl font-bold tracking-tight">
+                <p className="text-3xl font-bold tracking-tight tabular-nums">
                   {published.length}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
@@ -159,18 +159,18 @@ export default function BusinessesPage() {
                 </p>
               </CardContent>
             </Card>
-            <Card className="group relative overflow-hidden border-border/50 hover:shadow-lg hover:shadow-amber-500/5 transition-all duration-300">
+            <Card className="group relative overflow-hidden border-border/50 hover:shadow-lg hover:shadow-amber-500/5 transition-[box-shadow] duration-300">
               <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-amber-500 to-amber-400/40" />
               <CardContent className="p-5">
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center justify-between mb-3">
                   <span className="text-sm font-medium text-muted-foreground">
                     Borradores
                   </span>
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10 group-hover:bg-amber-500/15 transition-colors">
-                    <FileEdit className="h-4.5 w-4.5 text-amber-500" />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10 dark:bg-amber-500/20 group-hover:bg-amber-500/15 dark:group-hover:bg-amber-500/25 transition-colors">
+                    <FileEdit className="h-4.5 w-4.5 text-amber-500 dark:text-amber-400" />
                   </div>
                 </div>
-                <p className="text-3xl font-bold tracking-tight">
+                <p className="text-3xl font-bold tracking-tight tabular-nums">
                   {drafts.length}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
@@ -185,7 +185,7 @@ export default function BusinessesPage() {
             className="relative overflow-hidden border-border/50"
             style={{ animation: "fadeIn 0.4s ease-out 0.1s both" }}
           >
-            <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-purple-500 to-primary/40" />
+            <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-accent to-primary/40" />
             <CardContent className="p-0">
               {isPending && businesses.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 gap-3">
@@ -228,17 +228,17 @@ export default function BusinessesPage() {
                           >
                             <TableCell className="w-[320px] max-w-[420px] whitespace-normal">
                               <div className="flex items-center gap-3">
-                                <Avatar className="h-9 w-9 shrink-0 ring-2 ring-transparent group-hover:ring-purple-500/20 transition-all">
-                                  <AvatarFallback className="bg-gradient-to-br from-purple-500/15 to-primary/15 text-purple-600 text-xs font-semibold">
+                                <Avatar className="h-9 w-9 shrink-0 ring-2 ring-transparent group-hover:ring-accent/20 transition-shadow">
+                                  <AvatarFallback className="bg-gradient-to-br from-accent/15 to-primary/15 dark:from-accent/25 dark:to-primary/25 text-accent dark:text-accent text-xs font-semibold">
                                     {business.name.charAt(0).toUpperCase()}
                                   </AvatarFallback>
                                 </Avatar>
                                 <div className="min-w-0">
-                                  <p className="font-medium group-hover:text-primary transition-colors">
+                                  <p className="font-medium truncate group-hover:text-primary transition-colors">
                                     {business.name}
                                   </p>
                                   {business.description && (
-                                    <p className="text-xs text-muted-foreground mt-0.5">
+                                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
                                       {business.description}
                                     </p>
                                   )}
@@ -246,7 +246,7 @@ export default function BusinessesPage() {
                               </div>
                             </TableCell>
                             <TableCell>
-                              <Badge className="text-[10px] border-0 bg-purple-500/10 text-purple-600 hover:bg-purple-500/20">
+                              <Badge className="text-[10px] border-0 bg-accent/10 dark:bg-accent/20 text-accent dark:text-accent hover:bg-accent/20 dark:hover:bg-accent/30">
                                 {business.category}
                               </Badge>
                             </TableCell>
@@ -257,14 +257,14 @@ export default function BusinessesPage() {
                               {business.isPublished ? (
                                 <span className="inline-flex items-center gap-1.5">
                                   <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                                  <Badge className="text-[10px] border-0 bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20">
+                                  <Badge className="text-[10px] border-0 bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 dark:hover:bg-emerald-500/30">
                                     Publicado
                                   </Badge>
                                 </span>
                               ) : (
                                 <span className="inline-flex items-center gap-1.5">
                                   <span className="h-2 w-2 rounded-full bg-amber-500" />
-                                  <Badge className="text-[10px] border-0 bg-amber-500/10 text-amber-600 hover:bg-amber-500/20">
+                                  <Badge className="text-[10px] border-0 bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 dark:hover:bg-amber-500/30">
                                     Borrador
                                   </Badge>
                                 </span>
@@ -294,7 +294,7 @@ export default function BusinessesPage() {
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  className="h-8 w-8 hover:bg-blue-500/10 hover:text-blue-500"
+                                  className="h-8 w-8 hover:bg-blue-500/10 dark:hover:bg-blue-500/20 hover:text-blue-500 dark:hover:text-blue-400"
                                   asChild
                                 >
                                   <Link

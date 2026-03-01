@@ -51,11 +51,11 @@ export default function ReportsPage() {
 
     if (plan && !canAccess(plan, 'reports')) {
         return (
-            <div className="space-y-6">
+            <div className="space-y-8">
                 <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-500/8 via-background to-emerald-500/6 border border-border/50 p-6">
                     <div className="relative space-y-1">
-                        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-3">
-                            <BarChart3 className="h-7 w-7 text-amber-500" />
+                        <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
+                            <BarChart3 className="h-7 w-7 text-amber-500 dark:text-amber-400" />
                             Reportes
                         </h1>
                         <p className="text-muted-foreground">
@@ -119,18 +119,18 @@ export default function ReportsPage() {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-8">
             {/* ── Header con banner gradiente ── */}
             <div
                 className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-500/8 via-background to-emerald-500/6 border border-border/50 p-6"
                 style={{ animation: 'fadeIn 0.4s ease-out' }}
             >
-                <div className="absolute -top-12 -right-12 h-40 w-40 rounded-full bg-amber-500/8 blur-3xl" />
-                <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-emerald-500/6 blur-3xl" />
+                <div className="absolute -top-12 -right-12 h-40 w-40 rounded-full bg-amber-500/8 dark:bg-amber-500/15 blur-3xl" />
+                <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-emerald-500/6 dark:bg-emerald-500/12 blur-3xl" />
 
                 <div className="relative space-y-1">
-                    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-3">
-                        <BarChart3 className="h-7 w-7 text-amber-500" />
+                    <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
+                        <BarChart3 className="h-7 w-7 text-amber-500 dark:text-amber-400" />
                         Reportes
                     </h1>
                     <p className="text-muted-foreground">
@@ -218,7 +218,7 @@ export default function ReportsPage() {
                         <CardHeader className="flex flex-row items-center justify-between">
                             <div>
                                 <CardTitle className="flex items-center gap-2">
-                                    <DollarSign className="h-5 w-5 text-emerald-500" />
+                                    <DollarSign className="h-5 w-5 text-emerald-500 dark:text-emerald-400" />
                                     Reporte de Facturación
                                 </CardTitle>
                                 <CardDescription>Detalle de ingresos por cita completada</CardDescription>
@@ -276,8 +276,8 @@ export default function ReportsPage() {
                                                         <Badge
                                                             className={`text-[10px] border-0 ${
                                                                 row.paymentStatus === 'paid'
-                                                                    ? 'bg-emerald-500/10 text-emerald-600'
-                                                                    : 'bg-amber-500/10 text-amber-600'
+                                                                    ? 'bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+                                                                    : 'bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400'
                                                             }`}
                                                         >
                                                             {row.paymentStatus === 'paid' ? 'Pagado' : 'Pendiente'}
@@ -300,7 +300,7 @@ export default function ReportsPage() {
                         <CardHeader className="flex flex-row items-center justify-between">
                             <div>
                                 <CardTitle className="flex items-center gap-2">
-                                    <BarChart3 className="h-5 w-5 text-blue-500" />
+                                    <BarChart3 className="h-5 w-5 text-blue-500 dark:text-blue-400" />
                                     Reporte de Ocupación
                                 </CardTitle>
                                 <CardDescription>Rendimiento por profesional en el período</CardDescription>
@@ -347,7 +347,7 @@ export default function ReportsPage() {
                                                     <div className="inline-flex items-center gap-2.5">
                                                         <div className="h-1.5 w-16 rounded-full bg-muted overflow-hidden">
                                                             <div
-                                                                className={`h-full rounded-full transition-all ${
+                                                                className={`h-full rounded-full transition-[width] ${
                                                                     (row.occupancyRate as number) >= 80
                                                                         ? 'bg-emerald-500'
                                                                         : (row.occupancyRate as number) >= 50
@@ -360,10 +360,10 @@ export default function ReportsPage() {
                                                         <Badge
                                                             className={`text-[10px] border-0 tabular-nums ${
                                                                 (row.occupancyRate as number) >= 80
-                                                                    ? 'bg-emerald-500/10 text-emerald-600'
+                                                                    ? 'bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400'
                                                                     : (row.occupancyRate as number) >= 50
-                                                                        ? 'bg-amber-500/10 text-amber-600'
-                                                                        : 'bg-red-500/10 text-red-600'
+                                                                        ? 'bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400'
+                                                                        : 'bg-red-500/10 dark:bg-red-500/20 text-red-600 dark:text-red-400'
                                                             }`}
                                                         >
                                                             {String(row.occupancyRate)}%

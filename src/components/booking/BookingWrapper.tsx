@@ -219,8 +219,8 @@ function HeroSection({
                             </div>
                             <Separator className="bg-border/50" />
                             <div className="flex items-center gap-3.5">
-                                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-500/10">
-                                    <Users className="h-5 w-5 text-blue-500" />
+                                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-500/10 dark:bg-blue-500/20">
+                                    <Users className="h-5 w-5 text-blue-500 dark:text-blue-400" />
                                 </div>
                                 <div>
                                     <p className="text-2xl font-bold tracking-tight">{professionalCount}</p>
@@ -247,9 +247,9 @@ function TodayHours({ hours }: { hours: WorkingHour[] }) {
     return (
         <div className="flex items-center gap-3.5">
             <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${
-                todayHour?.isOpen ? 'bg-emerald-500/10' : 'bg-muted'
+                todayHour?.isOpen ? 'bg-emerald-500/10 dark:bg-emerald-500/20' : 'bg-muted'
             }`}>
-                <Clock className={`h-5 w-5 ${todayHour?.isOpen ? 'text-emerald-500' : 'text-muted-foreground'}`} />
+                <Clock className={`h-5 w-5 ${todayHour?.isOpen ? 'text-emerald-500 dark:text-emerald-400' : 'text-muted-foreground'}`} />
             </div>
             <div>
                 {todayHour?.isOpen ? (
@@ -260,7 +260,7 @@ function TodayHours({ hours }: { hours: WorkingHour[] }) {
                             </p>
                             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                         </div>
-                        <p className="text-xs text-emerald-600 font-medium">Abierto hoy</p>
+                        <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Abierto hoy</p>
                     </>
                 ) : (
                     <>
@@ -289,11 +289,11 @@ function ServicesSection({
     return (
         <section id="servicios" className="relative py-16 lg:py-20 overflow-hidden">
             <div className="absolute inset-0 -z-10 bg-muted/20" />
-            <div className="absolute -top-16 right-0 h-48 w-48 rounded-full bg-emerald-500/5 blur-3xl" />
+            <div className="absolute -top-16 right-0 h-48 w-48 rounded-full bg-emerald-500/5 dark:bg-emerald-500/10 blur-3xl" />
 
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="mb-10" style={{ animation: 'fadeIn 0.4s ease-out' }}>
-                    <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/8 px-3 py-1 text-xs font-medium text-emerald-600 mb-3">
+                    <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/8 dark:bg-emerald-500/15 px-3 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 mb-3">
                         <Sparkles className="h-3 w-3" />
                         Catálogo de servicios
                     </div>
@@ -309,9 +309,12 @@ function ServicesSection({
                     {services.map((service, i) => (
                         <Card
                             key={String(service._id)}
-                            className="group relative border-border/50 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 overflow-hidden cursor-pointer"
+                            role="button"
+                            tabIndex={0}
+                            className="group relative border-border/50 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-[box-shadow,border-color] duration-300 overflow-hidden cursor-pointer"
                             style={{ animation: `fadeIn 0.4s ease-out ${0.05 + i * 0.05}s both` }}
                             onClick={() => onBookService(String(service._id))}
+                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onBookService(String(service._id)); } }}
                         >
                             <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-emerald-500 to-primary/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
@@ -332,7 +335,7 @@ function ServicesSection({
                                 )}
 
                                 <div className="flex items-center justify-between">
-                                    <span className="inline-flex items-center gap-1.5 rounded-md bg-blue-500/8 px-2.5 py-1 text-xs font-medium text-blue-600">
+                                    <span className="inline-flex items-center gap-1.5 rounded-md bg-blue-500/8 dark:bg-blue-500/15 px-2.5 py-1 text-xs font-medium text-blue-600 dark:text-blue-400">
                                         <Clock className="h-3 w-3" />
                                         {service.duration} min
                                     </span>
@@ -357,11 +360,11 @@ function ServicesSection({
 function TeamSection({ professionals }: { professionals: IProfessional[] }) {
     return (
         <section id="equipo" className="relative py-16 lg:py-20 overflow-hidden">
-            <div className="absolute -bottom-16 left-0 h-48 w-48 rounded-full bg-blue-500/5 blur-3xl" />
+            <div className="absolute -bottom-16 left-0 h-48 w-48 rounded-full bg-blue-500/5 dark:bg-blue-500/10 blur-3xl" />
 
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="mb-10" style={{ animation: 'fadeIn 0.4s ease-out' }}>
-                    <div className="inline-flex items-center gap-2 rounded-full bg-blue-500/8 px-3 py-1 text-xs font-medium text-blue-600 mb-3">
+                    <div className="inline-flex items-center gap-2 rounded-full bg-blue-500/8 dark:bg-blue-500/15 px-3 py-1 text-xs font-medium text-blue-600 dark:text-blue-400 mb-3">
                         <Shield className="h-3 w-3" />
                         Equipo profesional
                     </div>
@@ -373,7 +376,7 @@ function TeamSection({ professionals }: { professionals: IProfessional[] }) {
                     </p>
                 </div>
 
-                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {professionals.map((pro, i) => {
                         const initials = pro.displayName
                             .split(' ')
@@ -385,14 +388,14 @@ function TeamSection({ professionals }: { professionals: IProfessional[] }) {
                         return (
                             <Card
                                 key={String(pro._id)}
-                                className="group relative border-border/50 hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-300 overflow-hidden"
+                                className="group relative border-border/50 hover:shadow-xl hover:shadow-blue-500/5 transition-[box-shadow,border-color] duration-300 overflow-hidden"
                                 style={{ animation: `fadeIn 0.4s ease-out ${0.05 + i * 0.05}s both` }}
                             >
-                                <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-blue-500 to-blue-400/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-blue-500 to-blue-400/40 dark:from-blue-400 dark:to-blue-500/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                                 <CardContent className="p-6">
                                     <div className="flex items-center gap-4 mb-4">
-                                        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500/15 to-primary/15 text-blue-600 font-bold text-lg ring-2 ring-transparent group-hover:ring-blue-500/20 transition-all">
+                                        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500/15 to-primary/15 dark:from-blue-500/25 dark:to-primary/25 text-blue-600 dark:text-blue-400 font-bold text-lg ring-2 ring-transparent group-hover:ring-blue-500/20 transition-shadow transition-colors">
                                             {initials}
                                         </div>
                                         <div className="min-w-0">
@@ -401,7 +404,7 @@ function TeamSection({ professionals }: { professionals: IProfessional[] }) {
                                             </h3>
                                             {pro.rating > 0 && (
                                                 <div className="flex items-center gap-1.5 text-sm">
-                                                    <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                                                    <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400 dark:fill-amber-300 dark:text-amber-300" />
                                                     <span className="font-semibold tabular-nums">
                                                         {pro.rating.toFixed(1)}
                                                     </span>
@@ -421,7 +424,7 @@ function TeamSection({ professionals }: { professionals: IProfessional[] }) {
                                                 <Badge
                                                     key={spec}
                                                     variant="outline"
-                                                    className="text-[11px] border-border/60 text-muted-foreground hover:border-blue-500/40 hover:text-blue-600 transition-colors"
+                                                    className="text-[11px] border-border/60 text-muted-foreground hover:border-blue-500/40 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                                                 >
                                                     {spec}
                                                 </Badge>

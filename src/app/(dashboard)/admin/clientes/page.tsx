@@ -74,10 +74,10 @@ export default function ClientsPage() {
     const vipCount = SAMPLE_CLIENTS.filter((c) => c.tags.includes('VIP')).length;
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-8">
             {/* ── Header con banner gradiente ── */}
             <div
-                className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-accent/8 via-background to-primary/6 border border-border/50 p-6"
+                className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/8 via-background to-accent/6 border border-border/50 p-6"
                 style={{ animation: 'fadeIn 0.4s ease-out' }}
             >
                 <div className="absolute -top-12 -right-12 h-40 w-40 rounded-full bg-accent/8 blur-3xl" />
@@ -85,7 +85,7 @@ export default function ClientsPage() {
 
                 <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div className="space-y-1">
-                        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-3">
+                        <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
                             <Users className="h-7 w-7 text-accent" />
                             Clientes
                         </h1>
@@ -102,42 +102,42 @@ export default function ClientsPage() {
 
             {/* ── Stats rápidas ── */}
             <div className="grid gap-4 sm:grid-cols-3" style={{ animation: 'fadeIn 0.4s ease-out 0.05s both' }}>
-                <Card className="group relative overflow-hidden border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300">
+                <Card className="group relative overflow-hidden border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-[box-shadow] duration-300">
                     <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-primary to-primary/40" />
                     <CardContent className="p-5">
-                        <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center justify-between mb-3">
                             <span className="text-sm font-medium text-muted-foreground">Total clientes</span>
                             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 group-hover:bg-primary/15 transition-colors">
                                 <Users className="h-4.5 w-4.5 text-primary" />
                             </div>
                         </div>
-                        <p className="text-3xl font-bold tracking-tight">{SAMPLE_CLIENTS.length}</p>
+                        <p className="text-3xl font-bold tracking-tight tabular-nums">{SAMPLE_CLIENTS.length}</p>
                         <p className="text-xs text-muted-foreground mt-1">registrados</p>
                     </CardContent>
                 </Card>
-                <Card className="group relative overflow-hidden border-border/50 hover:shadow-lg hover:shadow-blue-500/5 transition-all duration-300">
+                <Card className="group relative overflow-hidden border-border/50 hover:shadow-lg hover:shadow-blue-500/5 dark:hover:shadow-blue-500/10 transition-[box-shadow] duration-300">
                     <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-blue-500 to-blue-400/40" />
                     <CardContent className="p-5">
-                        <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center justify-between mb-3">
                             <span className="text-sm font-medium text-muted-foreground">Visitas totales</span>
-                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500/10 group-hover:bg-blue-500/15 transition-colors">
-                                <Calendar className="h-4.5 w-4.5 text-blue-500" />
+                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500/10 dark:bg-blue-500/20 group-hover:bg-blue-500/15 transition-colors">
+                                <Calendar className="h-4.5 w-4.5 text-blue-500 dark:text-blue-400" />
                             </div>
                         </div>
-                        <p className="text-3xl font-bold tracking-tight">{totalVisits}</p>
+                        <p className="text-3xl font-bold tracking-tight tabular-nums">{totalVisits}</p>
                         <p className="text-xs text-muted-foreground mt-1">citas completadas</p>
                     </CardContent>
                 </Card>
-                <Card className="group relative overflow-hidden border-border/50 hover:shadow-lg hover:shadow-amber-500/5 transition-all duration-300">
+                <Card className="group relative overflow-hidden border-border/50 hover:shadow-lg hover:shadow-amber-500/5 dark:hover:shadow-amber-500/10 transition-[box-shadow] duration-300">
                     <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-amber-500 to-amber-400/40" />
                     <CardContent className="p-5">
-                        <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center justify-between mb-3">
                             <span className="text-sm font-medium text-muted-foreground">Clientes VIP</span>
-                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10 group-hover:bg-amber-500/15 transition-colors">
-                                <Crown className="h-4.5 w-4.5 text-amber-500" />
+                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10 dark:bg-amber-500/20 group-hover:bg-amber-500/15 transition-colors">
+                                <Crown className="h-4.5 w-4.5 text-amber-500 dark:text-amber-400" />
                             </div>
                         </div>
-                        <p className="text-3xl font-bold tracking-tight">{vipCount}</p>
+                        <p className="text-3xl font-bold tracking-tight tabular-nums">{vipCount}</p>
                         <p className="text-xs text-muted-foreground mt-1">clientes destacados</p>
                     </CardContent>
                 </Card>
@@ -153,6 +153,7 @@ export default function ClientsPage() {
                     placeholder="Buscar cliente por nombre o email..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
+                    aria-label="Buscar cliente"
                     className="pl-10 border-border/60"
                 />
             </div>
@@ -185,10 +186,10 @@ export default function ClientsPage() {
                                 </TableRow>
                             ) : (
                                 filteredClients.map((client) => (
-                                    <TableRow key={client.id} className="group cursor-pointer">
+                                    <TableRow key={client.id} className="group">
                                         <TableCell>
                                             <div className="flex items-center gap-3">
-                                                <Avatar className="h-9 w-9 ring-2 ring-transparent group-hover:ring-primary/20 transition-all">
+                                                <Avatar className="h-9 w-9 ring-2 ring-transparent group-hover:ring-primary/20 transition-shadow">
                                                     <AvatarFallback className="bg-gradient-to-br from-primary/15 to-accent/15 text-primary text-xs font-semibold">
                                                         {client.name
                                                             .split(' ')
@@ -230,10 +231,10 @@ export default function ClientsPage() {
                                                         key={tag}
                                                         className={`text-[10px] border-0 ${
                                                             tag === 'VIP'
-                                                                ? 'bg-amber-500/10 text-amber-600 hover:bg-amber-500/20'
+                                                                ? 'bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 dark:hover:bg-amber-500/30'
                                                                 : tag === 'Frecuente'
-                                                                    ? 'bg-blue-500/10 text-blue-600 hover:bg-blue-500/20'
-                                                                    : 'bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20'
+                                                                    ? 'bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 dark:hover:bg-blue-500/30'
+                                                                    : 'bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 dark:hover:bg-emerald-500/30'
                                                         }`}
                                                     >
                                                         {tag === 'VIP' && <Crown className="h-2.5 w-2.5 mr-1" />}

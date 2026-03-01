@@ -157,8 +157,8 @@ export function AppointmentDetailDialog({
                             <Separator />
                             <div className="space-y-2">
                                 <div className="flex items-center gap-2 text-sm">
-                                    <XCircle className="h-4 w-4 text-red-500 shrink-0" />
-                                    <span className="text-xs font-semibold text-red-600 uppercase tracking-wider">Motivo de cancelación</span>
+                                    <XCircle className="h-4 w-4 text-red-500 dark:text-red-400 shrink-0" />
+                                    <span className="text-xs font-semibold text-red-600 dark:text-red-400 uppercase tracking-wider">Motivo de cancelación</span>
                                 </div>
                                 <p className="text-sm text-muted-foreground pl-6">{appointment.cancellationReason}</p>
                             </div>

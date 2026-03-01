@@ -217,7 +217,7 @@ export default function ProfessionalCalendarPage() {
         <div className="space-y-6">
             {/* Header */}
             <div
-                className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-accent/8 via-background to-primary/6 border border-border/50 p-6"
+                className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/8 via-background to-accent/6 border border-border/50 p-6"
                 style={{ animation: 'fadeIn 0.4s ease-out' }}
             >
                 <div className="absolute -top-12 -right-12 h-40 w-40 rounded-full bg-accent/8 blur-3xl" />
@@ -226,7 +226,7 @@ export default function ProfessionalCalendarPage() {
                 <div className="relative flex flex-col gap-4">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div className="space-y-1">
-                            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-3">
+                            <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
                                 <CalendarDays className="h-7 w-7 text-accent" />
                                 Mi Calendario
                             </h1>
@@ -266,20 +266,21 @@ export default function ProfessionalCalendarPage() {
                                 variant="outline"
                                 size="icon"
                                 className="border-border/60"
+                                aria-label="Fecha anterior"
                                 onClick={() =>
                                     setSelectedDate((d) =>
                                         viewMode === 'week' ? addWeeks(d, -1) : addDays(d, -1),
                                     )
                                 }
                             >
-                                <ChevronLeft className="h-4 w-4" />
+                                <ChevronLeft className="h-4 w-4" aria-hidden="true" />
                             </Button>
                             <Button
                                 variant={isToday(selectedDate) && viewMode === 'today' ? 'default' : 'outline'}
                                 size="sm"
                                 className={
                                     isToday(selectedDate) && viewMode === 'today'
-                                        ? 'bg-gradient-to-r from-accent to-primary hover:opacity-90'
+                                        ? 'bg-gradient-to-r from-primary to-accent hover:opacity-90'
                                         : 'border-border/60'
                                 }
                                 onClick={() => {
@@ -293,13 +294,14 @@ export default function ProfessionalCalendarPage() {
                                 variant="outline"
                                 size="icon"
                                 className="border-border/60"
+                                aria-label="Fecha siguiente"
                                 onClick={() =>
                                     setSelectedDate((d) =>
                                         viewMode === 'week' ? addWeeks(d, 1) : addDays(d, 1),
                                     )
                                 }
                             >
-                                <ChevronRight className="h-4 w-4" />
+                                <ChevronRight className="h-4 w-4" aria-hidden="true" />
                             </Button>
                         </div>
                     </div>
@@ -347,13 +349,13 @@ export default function ProfessionalCalendarPage() {
                             </div>
                             <div className="flex items-center justify-between">
                                 <span className="text-sm text-muted-foreground">Confirmadas</span>
-                                <Badge className="bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 border-0">
+                                <Badge className="bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 dark:hover:bg-blue-500/30 border-0">
                                     {confirmedCount}
                                 </Badge>
                             </div>
                             <div className="flex items-center justify-between">
                                 <span className="text-sm text-muted-foreground">Pendientes</span>
-                                <Badge className="bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 border-0">
+                                <Badge className="bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 dark:hover:bg-amber-500/30 border-0">
                                     {pendingCount}
                                 </Badge>
                             </div>
@@ -479,8 +481,11 @@ function ProfWeekView({
                     return (
                         <div
                             key={day.toISOString()}
-                            className={`bg-card flex flex-col cursor-pointer hover:bg-muted/40 transition-colors ${blocked ? 'bg-red-500/[0.03]' : ''}`}
+                            role="button"
+                            tabIndex={0}
+                            className={`bg-card flex flex-col cursor-pointer hover:bg-muted/40 transition-colors ${blocked ? 'bg-red-500/[0.03] dark:bg-red-500/[0.12]' : ''}`}
                             onClick={() => onDayClick(day)}
+                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onDayClick(day); } }}
                         >
                             <div className={`sticky top-0 bg-card border-b border-border/40 px-2 py-2.5 text-center ${today ? 'bg-primary/5' : ''}`}>
                                 <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
@@ -495,7 +500,7 @@ function ProfWeekView({
                                     </span>
                                 )}
                                 {blocked && (
-                                    <span className="flex items-center justify-center gap-0.5 text-[10px] text-red-500">
+                                    <span className="flex items-center justify-center gap-0.5 text-[10px] text-red-500 dark:text-red-400">
                                         <Ban className="h-2.5 w-2.5" />
                                         Bloqueado
                                     </span>
@@ -508,11 +513,14 @@ function ProfWeekView({
                                     return (
                                         <div
                                             key={apt._id}
+                                            role="button"
+                                            tabIndex={0}
                                             className="flex items-center gap-1.5 px-1.5 py-1 rounded-md bg-accent/10 border border-accent/20 text-[11px] leading-tight cursor-pointer hover:opacity-80 transition-opacity"
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 onAppointmentClick(apt);
                                             }}
+                                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); onAppointmentClick(apt); } }}
                                         >
                                             <div className={`h-1.5 w-1.5 rounded-full shrink-0 ${statusConfig.dot}`} />
                                             <span className="font-semibold tabular-nums text-accent-foreground">
@@ -609,7 +617,7 @@ function ProfTimelineView({
                                     </span>
                                 </div>
                                 <div className="absolute top-0 bottom-0 flex items-end pb-1.5" style={{ left: SLOT_WIDTH_PX }}>
-                                    <span className="text-[10px] tabular-nums pl-1 select-none text-muted-foreground/40">
+                                    <span className="text-[10px] tabular-nums pl-1 select-none text-muted-foreground/60">
                                         {String(hour).padStart(2, '0')}:30
                                     </span>
                                 </div>
@@ -662,7 +670,9 @@ function ProfTimelineView({
                                 <Tooltip key={apt._id}>
                                     <TooltipTrigger asChild>
                                         <div
-                                            className={`absolute top-1.5 bottom-1.5 rounded-lg overflow-hidden cursor-pointer transition-all
+                                            role="button"
+                                            tabIndex={0}
+                                            className={`absolute top-1.5 bottom-1.5 rounded-lg overflow-hidden cursor-pointer transition-[opacity,box-shadow]
                                                 bg-card border border-accent/30 bg-accent/10
                                                 ${apt.status === 'pending' ? 'border-dashed' : ''}
                                                 ${apt.status === 'in-progress' ? 'ring-2 ring-primary/25' : ''}
@@ -673,6 +683,7 @@ function ProfTimelineView({
                                                 e.stopPropagation();
                                                 onAppointmentClick(apt);
                                             }}
+                                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); onAppointmentClick(apt); } }}
                                         >
                                             <div className="absolute inset-0 bg-accent/5 pointer-events-none" />
                                             <div className={`absolute left-0 top-0 bottom-0 w-1 ${statusConfig.dot}`} />
@@ -733,15 +744,18 @@ function ProfTimelineView({
                             if (!blockedBlock) return null;
                             return (
                                 <div
-                                    className="absolute inset-0 z-[5] flex items-center justify-center gap-2 cursor-pointer"
+                                    role="button"
+                                    tabIndex={0}
+                                    className="absolute inset-0 z-[5] flex items-center justify-center gap-2 cursor-pointer bg-red-500/[0.08] dark:bg-red-500/[0.15]"
                                     style={{
-                                        background:
+                                        backgroundImage:
                                             'repeating-linear-gradient(135deg, transparent, transparent 4px, rgba(239,68,68,0.08) 4px, rgba(239,68,68,0.08) 8px)',
                                     }}
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         onBlockClick?.(blockedBlock);
                                     }}
+                                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); onBlockClick?.(blockedBlock); } }}
                                 >
                                     <Ban className="h-4 w-4 text-red-500/60" />
                                     <span className="text-xs font-medium text-red-500/70">Bloqueado</span>

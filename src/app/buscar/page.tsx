@@ -149,11 +149,12 @@ export default function SearchPage() {
                         style={{ animation: 'fadeIn 0.4s ease-out 0.15s both' }}
                     >
                         <div className="relative flex-1">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-muted-foreground" />
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <Input
                                 placeholder="Buscar negocio o servicio..."
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
+                                aria-label="Buscar negocio o servicio"
                                 className="pl-11 h-12 bg-background/80 backdrop-blur-sm border-border/60 shadow-sm text-base"
                             />
                         </div>
@@ -202,11 +203,11 @@ export default function SearchPage() {
                     </div>
 
                     {/* Grid de tarjetas */}
-                    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         {filteredResults.map((result, i) => (
                             <Card
                                 key={result.id}
-                                className="group relative overflow-hidden border-border/50 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 hover:-translate-y-1"
+                                className="group relative overflow-hidden border-border/50 hover:shadow-xl hover:shadow-primary/5 transition-[box-shadow,transform,border-color] duration-300 hover:-translate-y-1"
                                 style={{ animation: `fadeIn 0.4s ease-out ${0.25 + i * 0.05}s both` }}
                             >
                                 {/* Barra de acento superior */}
@@ -222,7 +223,7 @@ export default function SearchPage() {
                                     {/* Badge de estado */}
                                     <div className="absolute top-3 right-3">
                                         {result.openNow ? (
-                                            <Badge className="text-[10px] border-0 bg-emerald-500/90 text-white backdrop-blur-sm shadow-sm">
+                                            <Badge className="text-[10px] border-0 bg-emerald-500/90 dark:bg-emerald-500/80 text-white backdrop-blur-sm shadow-sm">
                                                 <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse mr-1.5" />
                                                 Abierto ahora
                                             </Badge>
@@ -236,7 +237,7 @@ export default function SearchPage() {
 
                                     {/* Rating overlay */}
                                     <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-lg bg-background/90 backdrop-blur-sm px-2.5 py-1.5 shadow-sm">
-                                        <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                                        <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400 dark:fill-amber-300 dark:text-amber-300" />
                                         <span className="text-sm font-bold tabular-nums">{result.rating}</span>
                                         <span className="text-xs text-muted-foreground">({result.reviewCount})</span>
                                     </div>
@@ -294,13 +295,13 @@ export default function SearchPage() {
                             className="text-center py-20"
                             style={{ animation: 'fadeIn 0.4s ease-out' }}
                         >
-                            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-muted/50 mb-5">
-                                <Search className="h-9 w-9 text-muted-foreground/30" />
+                            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-muted/50 mb-5">
+                                <Search className="h-7 w-7 text-muted-foreground/30" />
                             </div>
                             <p className="text-lg font-medium text-muted-foreground mb-1">
                                 No se encontraron resultados
                             </p>
-                            <p className="text-sm text-muted-foreground/60">
+                            <p className="text-sm text-muted-foreground">
                                 Intenta con otros términos de búsqueda o categoría
                             </p>
                             {category !== 'all' && (

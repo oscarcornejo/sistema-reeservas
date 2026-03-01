@@ -164,7 +164,7 @@ export default function NotificationBell() {
                         </div>
                     ) : notifications.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-8 text-center">
-                            <Bell className="mb-2 h-8 w-8 text-muted-foreground/40" />
+                            <Bell className="mb-2 h-8 w-8 text-muted-foreground/60" />
                             <p className="text-sm text-muted-foreground">
                                 Sin notificaciones
                             </p>
@@ -178,7 +178,7 @@ export default function NotificationBell() {
                                         key={notification.id}
                                         className={cn(
                                             'flex gap-3 px-4 py-3 transition-colors',
-                                            !notification.isRead && 'bg-primary/5'
+                                            !notification.isRead && 'bg-primary/5 dark:bg-primary/10'
                                         )}
                                     >
                                         <div

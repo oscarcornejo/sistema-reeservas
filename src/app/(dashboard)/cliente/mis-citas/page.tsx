@@ -99,7 +99,7 @@ export default function MisCitasPage() {
         !['completed', 'cancelled', 'no-show'].includes(apt.status);
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-8">
             {/* Header */}
             <div
                 className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/8 via-background to-accent/6 border border-border/50 p-6"
@@ -110,7 +110,7 @@ export default function MisCitasPage() {
 
                 <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div className="space-y-1">
-                        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-3">
+                        <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
                             <CalendarDays className="h-7 w-7 text-primary" />
                             Mis Citas
                         </h1>
@@ -155,8 +155,11 @@ export default function MisCitasPage() {
                         return (
                             <Card
                                 key={apt._id}
-                                className="group relative overflow-hidden border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 cursor-pointer"
+                                role="button"
+                                tabIndex={0}
+                                className="group relative overflow-hidden border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-[box-shadow] duration-300 cursor-pointer"
                                 onClick={() => handleAppointmentClick(apt)}
+                                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleAppointmentClick(apt); } }}
                             >
                                 {/* Barra de estado lateral */}
                                 <div className={`absolute left-0 top-0 bottom-0 w-1 ${statusConfig.dot}`} />

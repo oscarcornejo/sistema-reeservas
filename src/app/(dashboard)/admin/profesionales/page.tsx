@@ -45,8 +45,8 @@ import type { IProfessional } from '@/types';
 /** Colores de acento rotados por tarjeta */
 const CARD_ACCENTS = [
     { gradient: 'from-primary to-primary/40', bg: 'bg-primary/10', hover: 'hover:shadow-primary/5', text: 'text-primary' },
-    { gradient: 'from-blue-500 to-blue-400/40', bg: 'bg-blue-500/10', hover: 'hover:shadow-blue-500/5', text: 'text-blue-500' },
-    { gradient: 'from-emerald-500 to-emerald-400/40', bg: 'bg-emerald-500/10', hover: 'hover:shadow-emerald-500/5', text: 'text-emerald-500' },
+    { gradient: 'from-blue-500 to-blue-400/40', bg: 'bg-blue-500/10 dark:bg-blue-500/20', hover: 'hover:shadow-blue-500/5 dark:hover:shadow-blue-500/10', text: 'text-blue-500 dark:text-blue-400' },
+    { gradient: 'from-emerald-500 to-emerald-400/40', bg: 'bg-emerald-500/10 dark:bg-emerald-500/20', hover: 'hover:shadow-emerald-500/5 dark:hover:shadow-emerald-500/10', text: 'text-emerald-500 dark:text-emerald-400' },
 ];
 
 export default function ProfessionalsPage() {
@@ -110,19 +110,19 @@ export default function ProfessionalsPage() {
     );
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-8">
             {/* ── Header con banner gradiente ── */}
             <div
                 className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500/8 via-background to-primary/6 border border-border/50 p-6"
                 style={{ animation: 'fadeIn 0.4s ease-out' }}
             >
-                <div className="absolute -top-12 -right-12 h-40 w-40 rounded-full bg-emerald-500/8 blur-3xl" />
+                <div className="absolute -top-12 -right-12 h-40 w-40 rounded-full bg-emerald-500/8 dark:bg-emerald-500/15 blur-3xl" />
                 <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-primary/6 blur-3xl" />
 
                 <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div className="space-y-1">
-                        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-3">
-                            <Users className="h-7 w-7 text-emerald-500" />
+                        <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
+                            <Users className="h-7 w-7 text-emerald-500 dark:text-emerald-400" />
                             Profesionales
                         </h1>
                         <p className="text-muted-foreground">
@@ -207,42 +207,42 @@ export default function ProfessionalsPage() {
 
             {/* ── Stats rápidas ── */}
             <div className="grid gap-4 sm:grid-cols-3" style={{ animation: 'fadeIn 0.4s ease-out 0.05s both' }}>
-                <Card className="group relative overflow-hidden border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300">
+                <Card className="group relative overflow-hidden border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-[box-shadow] duration-300">
                     <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-primary to-primary/40" />
                     <CardContent className="p-5">
-                        <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center justify-between mb-3">
                             <span className="text-sm font-medium text-muted-foreground">Total equipo</span>
                             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 group-hover:bg-primary/15 transition-colors">
                                 <Users className="h-4.5 w-4.5 text-primary" />
                             </div>
                         </div>
-                        <p className="text-3xl font-bold tracking-tight">{professionals.length}</p>
+                        <p className="text-3xl font-bold tracking-tight tabular-nums">{professionals.length}</p>
                         <p className="text-xs text-muted-foreground mt-1">profesionales</p>
                     </CardContent>
                 </Card>
-                <Card className="group relative overflow-hidden border-border/50 hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-300">
+                <Card className="group relative overflow-hidden border-border/50 hover:shadow-lg hover:shadow-emerald-500/5 dark:hover:shadow-emerald-500/10 transition-[box-shadow] duration-300">
                     <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-emerald-500 to-emerald-400/40" />
                     <CardContent className="p-5">
-                        <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center justify-between mb-3">
                             <span className="text-sm font-medium text-muted-foreground">Activos</span>
-                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10 group-hover:bg-emerald-500/15 transition-colors">
-                                <Activity className="h-4.5 w-4.5 text-emerald-500" />
+                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10 dark:bg-emerald-500/20 group-hover:bg-emerald-500/15 transition-colors">
+                                <Activity className="h-4.5 w-4.5 text-emerald-500 dark:text-emerald-400" />
                             </div>
                         </div>
-                        <p className="text-3xl font-bold tracking-tight">{activeProfessionals.length}</p>
+                        <p className="text-3xl font-bold tracking-tight tabular-nums">{activeProfessionals.length}</p>
                         <p className="text-xs text-muted-foreground mt-1">disponibles</p>
                     </CardContent>
                 </Card>
-                <Card className="group relative overflow-hidden border-border/50 hover:shadow-lg hover:shadow-blue-500/5 transition-all duration-300">
-                    <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-blue-500 to-blue-400/40" />
+                <Card className="group relative overflow-hidden border-border/50 hover:shadow-lg hover:shadow-amber-500/5 dark:hover:shadow-amber-500/10 transition-[box-shadow] duration-300">
+                    <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-amber-500 to-amber-400/40" />
                     <CardContent className="p-5">
-                        <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center justify-between mb-3">
                             <span className="text-sm font-medium text-muted-foreground">Calificación promedio</span>
-                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500/10 group-hover:bg-blue-500/15 transition-colors">
-                                <Star className="h-4.5 w-4.5 text-blue-500" />
+                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10 dark:bg-amber-500/20 group-hover:bg-amber-500/15 transition-colors">
+                                <Star className="h-4.5 w-4.5 text-amber-500 dark:text-amber-400" />
                             </div>
                         </div>
-                        <p className="text-3xl font-bold tracking-tight">
+                        <p className="text-3xl font-bold tracking-tight tabular-nums">
                             {activeProfessionals.length > 0
                                 ? (activeProfessionals.reduce((sum, p) => sum + p.rating, 0) / activeProfessionals.length).toFixed(1)
                                 : '0.0'}
@@ -262,6 +262,7 @@ export default function ProfessionalsPage() {
                     placeholder="Buscar profesional..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
+                    aria-label="Buscar profesional"
                     className="pl-10 border-border/60"
                 />
             </div>
@@ -275,7 +276,9 @@ export default function ProfessionalsPage() {
                     </div>
                 ) : filtered.length === 0 ? (
                     <div className="col-span-full flex flex-col items-center justify-center py-16">
-                        <Users className="h-12 w-12 text-muted-foreground/20 mb-3" />
+                        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted/50 mb-4">
+                            <Users className="h-7 w-7 text-muted-foreground/50" />
+                        </div>
                         <p className="text-muted-foreground text-sm">
                             {searchQuery ? 'No se encontraron profesionales' : 'No hay profesionales aún'}
                         </p>
@@ -291,7 +294,7 @@ export default function ProfessionalsPage() {
                         return (
                             <Card
                                 key={pro._id.toString()}
-                                className={`group relative overflow-hidden border-border/50 hover:shadow-lg ${accent.hover} transition-all duration-300 hover:-translate-y-0.5`}
+                                className={`group relative overflow-hidden border-border/50 hover:shadow-lg ${accent.hover} transition-[box-shadow,transform] duration-300 hover:-translate-y-0.5`}
                                 style={{ animation: `fadeIn 0.4s ease-out ${0.15 + i * 0.05}s both` }}
                             >
                                 <div className={`absolute top-0 left-0 h-1 w-full bg-gradient-to-r ${accent.gradient}`} />
@@ -313,7 +316,7 @@ export default function ProfessionalsPage() {
                                                 <Badge
                                                     className={`text-[10px] border-0 shrink-0 ${
                                                         pro.isActive
-                                                            ? 'bg-emerald-500/10 text-emerald-600'
+                                                            ? 'bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400'
                                                             : 'bg-muted text-muted-foreground'
                                                     }`}
                                                 >
@@ -344,11 +347,11 @@ export default function ProfessionalsPage() {
                                     <div className="flex items-center justify-between mt-4 pt-4 border-t border-border/40">
                                         <div className="flex items-center gap-4">
                                             <div className="flex items-center gap-2">
-                                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10">
-                                                    <Star className="h-3.5 w-3.5 text-amber-500" />
+                                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10 dark:bg-amber-500/20">
+                                                    <Star className="h-3.5 w-3.5 text-amber-500 dark:text-amber-400" />
                                                 </div>
                                                 <div>
-                                                    <span className="font-bold text-sm">{pro.rating.toFixed(1)}</span>
+                                                    <span className="font-bold text-sm tabular-nums">{pro.rating.toFixed(1)}</span>
                                                     <p className="text-[10px] text-muted-foreground">calificación</p>
                                                 </div>
                                             </div>
@@ -357,7 +360,7 @@ export default function ProfessionalsPage() {
                                                     <Calendar className={`h-3.5 w-3.5 ${accent.text}`} />
                                                 </div>
                                                 <div>
-                                                    <span className="font-bold text-sm">{pro.totalReviews}</span>
+                                                    <span className="font-bold text-sm tabular-nums">{pro.totalReviews}</span>
                                                     <p className="text-[10px] text-muted-foreground">reseñas</p>
                                                 </div>
                                             </div>
@@ -366,7 +369,7 @@ export default function ProfessionalsPage() {
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
-                                                className="h-8 w-8 hover:bg-blue-500/10 hover:text-blue-500"
+                                                className="h-8 w-8 hover:bg-blue-500/10 dark:hover:bg-blue-500/20 hover:text-blue-500 dark:hover:text-blue-400"
                                                 onClick={() => {
                                                     setEditingPro(pro);
                                                     setIsDialogOpen(true);

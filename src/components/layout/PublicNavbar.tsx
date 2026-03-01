@@ -32,7 +32,7 @@ export default function PublicNavbar({
         <nav className="sticky top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-xl">
             <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
                 <Link href="/" className="flex items-center gap-2">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-lg">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-lg" aria-hidden="true">
                         T
                     </div>
                     <span className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">

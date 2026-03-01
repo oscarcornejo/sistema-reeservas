@@ -476,16 +476,16 @@ export default function CalendarPage() {
     <div className="space-y-6">
       {/* ── Header ── */}
       <div
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/8 via-background to-blue-500/6 border border-border/50 p-6"
+        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/8 via-background to-accent/6 border border-border/50 p-6"
         style={{ animation: "fadeIn 0.4s ease-out" }}
       >
         <div className="absolute -top-12 -right-12 h-40 w-40 rounded-full bg-primary/8 blur-3xl" />
-        <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-blue-500/6 blur-3xl" />
+        <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-accent/6 blur-3xl" />
 
         <div className="relative flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="space-y-1">
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-3">
+              <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
                 <CalendarDays className="h-7 w-7 text-primary" />
                 Calendario
               </h1>
@@ -533,6 +533,7 @@ export default function CalendarPage() {
                 variant="outline"
                 size="icon"
                 className="border-border/60"
+                aria-label="Fecha anterior"
                 onClick={() =>
                   setSelectedDate((d) =>
                     timeRange === "month"
@@ -543,7 +544,7 @@ export default function CalendarPage() {
                   )
                 }
               >
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-4 w-4" aria-hidden="true" />
               </Button>
               <Button
                 variant={
@@ -568,6 +569,7 @@ export default function CalendarPage() {
                 variant="outline"
                 size="icon"
                 className="border-border/60"
+                aria-label="Fecha siguiente"
                 onClick={() =>
                   setSelectedDate((d) =>
                     timeRange === "month"
@@ -578,7 +580,7 @@ export default function CalendarPage() {
                   )
                 }
               >
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-4 w-4" aria-hidden="true" />
               </Button>
             </div>
           </div>
@@ -788,16 +790,16 @@ export default function CalendarPage() {
                   <CheckCircle2 className="h-3.5 w-3.5 text-blue-500" />
                   Confirmadas
                 </span>
-                <Badge className="bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 border-0">
+                <Badge className="bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 dark:hover:bg-blue-500/30 border-0">
                   {confirmedCount}
                 </Badge>
               </div>
               <div className="flex items-center justify-between">
                 <span className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <AlertCircle className="h-3.5 w-3.5 text-amber-500" />
+                  <AlertCircle className="h-3.5 w-3.5 text-amber-500 dark:text-amber-400" />
                   Pendientes
                 </span>
-                <Badge className="bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 border-0">
+                <Badge className="bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 dark:hover:bg-amber-500/30 border-0">
                   {pendingCount}
                 </Badge>
               </div>
@@ -980,8 +982,11 @@ function WeekView({
           return (
             <div
               key={day.toISOString()}
-              className={`bg-card flex flex-col cursor-pointer hover:bg-muted/40 transition-colors ${hasBlocked ? "bg-red-500/[0.03]" : ""}`}
+              role="button"
+              tabIndex={0}
+              className={`bg-card flex flex-col cursor-pointer hover:bg-muted/40 transition-colors ${hasBlocked ? "bg-red-500/[0.03] dark:bg-red-500/[0.12]" : ""}`}
               onClick={() => onDayClick(day)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onDayClick(day); } }}
             >
               {/* Header del día */}
               <div
@@ -1001,7 +1006,7 @@ function WeekView({
                   </span>
                 )}
                 {hasBlocked && (
-                  <span className="flex items-center justify-center gap-0.5 text-[10px] text-red-500">
+                  <span className="flex items-center justify-center gap-0.5 text-[10px] text-red-500 dark:text-red-400">
                     <Ban className="h-2.5 w-2.5" />
                     Bloqueado
                   </span>
@@ -1026,11 +1031,14 @@ function WeekView({
                   return (
                     <div
                       key={apt._id.toString()}
+                      role="button"
+                      tabIndex={0}
                       className={`flex items-center gap-1.5 px-1.5 py-1 rounded-md ${color.bg} ${color.border} border text-[11px] leading-tight cursor-pointer hover:opacity-80 transition-opacity`}
                       onClick={(e) => {
                         e.stopPropagation();
                         onAppointmentClick?.(apt as unknown as IAppointmentPopulated);
                       }}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); onAppointmentClick?.(apt as unknown as IAppointmentPopulated); } }}
                     >
                       <div
                         className={`h-1.5 w-1.5 rounded-full shrink-0 ${statusConfig.dot}`}
@@ -1106,8 +1114,11 @@ function MonthView({
           return (
             <div
               key={day.toISOString()}
+              role="button"
+              tabIndex={0}
               className={`bg-card min-h-[100px] p-1.5 cursor-pointer hover:bg-muted/40 transition-colors ${!inMonth ? "opacity-40" : ""} ${hasBlocked && inMonth ? "bg-red-500/[0.03]" : ""}`}
               onClick={() => onDayClick(day)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onDayClick(day); } }}
             >
               <div className="flex items-center gap-1">
                 <span
@@ -1135,11 +1146,14 @@ function MonthView({
                     return (
                       <div
                         key={apt._id.toString()}
+                        role="button"
+                        tabIndex={0}
                         className="flex items-center gap-1 text-[10px] leading-tight cursor-pointer hover:opacity-80 transition-opacity"
                         onClick={(e) => {
                           e.stopPropagation();
                           onAppointmentClick?.(apt as unknown as IAppointmentPopulated);
                         }}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); onAppointmentClick?.(apt as unknown as IAppointmentPopulated); } }}
                       >
                         <div
                           className={`h-1.5 w-1.5 rounded-full shrink-0 ${color.dot}`}
@@ -1296,7 +1310,7 @@ function ResourceTimelineView({
                   className="absolute top-0 bottom-0 flex items-end pb-1.5"
                   style={{ left: SLOT_WIDTH_PX }}
                 >
-                  <span className="text-[10px] tabular-nums pl-1 select-none text-muted-foreground/40">
+                  <span className="text-[10px] tabular-nums pl-1 select-none text-muted-foreground/60">
                     {String(hour).padStart(2, "0")}:30
                   </span>
                 </div>
@@ -1380,6 +1394,9 @@ function ResourceTimelineView({
                 {HALF_HOUR_SLOTS.map((slotTime, slotIdx) => (
                   <div
                     key={slotTime}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Agendar cita a las ${slotTime}`}
                     className={`absolute top-0 bottom-0 cursor-pointer transition-colors hover:bg-primary/[0.06] active:bg-primary/[0.10] ${
                       slotIdx % 2 === 0
                         ? "border-l border-border/40"
@@ -1390,6 +1407,7 @@ function ResourceTimelineView({
                       width: SLOT_WIDTH_PX,
                     }}
                     onClick={() => handleSlotClick(prof, slotTime)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleSlotClick(prof, slotTime); } }}
                   />
                 ))}
 
@@ -1406,15 +1424,18 @@ function ResourceTimelineView({
                 {/* Overlay de bloqueo */}
                 {blockedBlock && (
                   <div
-                    className="absolute inset-0 z-[5] flex items-center justify-center gap-2 cursor-pointer"
+                    role="button"
+                    tabIndex={0}
+                    className="absolute inset-0 z-[5] flex items-center justify-center gap-2 cursor-pointer bg-red-500/[0.08] dark:bg-red-500/[0.15]"
                     style={{
-                      background:
+                      backgroundImage:
                         "repeating-linear-gradient(135deg, transparent, transparent 4px, rgba(239,68,68,0.08) 4px, rgba(239,68,68,0.08) 8px)",
                     }}
                     onClick={(e) => {
                       e.stopPropagation();
                       onBlockClick?.(blockedBlock);
                     }}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); onBlockClick?.(blockedBlock); } }}
                   >
                     <Ban className="h-4 w-4 text-red-500/60" />
                     <span className="text-xs font-medium text-red-500/70">
@@ -1488,7 +1509,9 @@ function AppointmentBlock({
     <Tooltip>
       <TooltipTrigger asChild>
         <div
-          className={`absolute top-1.5 bottom-1.5 rounded-lg overflow-hidden cursor-pointer transition-all
+          role="button"
+          tabIndex={0}
+          className={`absolute top-1.5 bottom-1.5 rounded-lg overflow-hidden cursor-pointer transition-[opacity,box-shadow]
                         bg-card border ${color.border}
                         ${apt.status === "pending" ? "border-dashed" : ""}
                         ${apt.status === "in-progress" ? "ring-2 ring-primary/25" : ""}
@@ -1499,6 +1522,7 @@ function AppointmentBlock({
             e.stopPropagation();
             onClick?.(apt);
           }}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); onClick?.(apt); } }}
         >
           {/* Color tint overlay — makes block identifiable by professional */}
           <div className={`absolute inset-0 ${color.bg} pointer-events-none`} />

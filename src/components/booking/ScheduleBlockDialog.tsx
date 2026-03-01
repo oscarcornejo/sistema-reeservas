@@ -167,8 +167,8 @@ export function ScheduleBlockDialog({
 
                     {/* Tipo de bloqueo */}
                     <div className="space-y-1.5">
-                        <Label>Tipo de bloqueo *</Label>
-                        <div className="grid grid-cols-4 gap-2">
+                        <Label id="block-type-label">Tipo de bloqueo *</Label>
+                        <div className="grid grid-cols-4 gap-2" role="group" aria-labelledby="block-type-label">
                             {BLOCK_TYPE_OPTIONS.map((opt) => {
                                 const Icon = opt.icon;
                                 const isSelected = blockType === opt.value;
@@ -177,7 +177,7 @@ export function ScheduleBlockDialog({
                                         key={opt.value}
                                         type="button"
                                         onClick={() => setBlockType(opt.value)}
-                                        className={`flex flex-col items-center gap-1 rounded-lg border p-2.5 text-center transition-colors cursor-pointer ${
+                                        className={`flex flex-col items-center gap-1 rounded-lg border p-2.5 text-center transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                                             isSelected
                                                 ? 'border-primary bg-primary/5 text-primary'
                                                 : 'border-border/60 hover:bg-muted/50 text-muted-foreground'
@@ -194,8 +194,9 @@ export function ScheduleBlockDialog({
                     {/* Fecha de inicio */}
                     {blockType !== 'full' && (
                         <div className="space-y-1.5">
-                            <Label>Fecha de inicio *</Label>
+                            <Label htmlFor="block-start-date">Fecha de inicio *</Label>
                             <Input
+                                id="block-start-date"
                                 type="date"
                                 value={startDate}
                                 onChange={(e) => setStartDate(e.target.value)}
@@ -205,8 +206,9 @@ export function ScheduleBlockDialog({
 
                     {/* Motivo */}
                     <div className="space-y-1.5">
-                        <Label>Motivo *</Label>
+                        <Label htmlFor="block-reason">Motivo *</Label>
                         <Textarea
+                            id="block-reason"
                             value={reason}
                             onChange={(e) => setReason(e.target.value)}
                             placeholder="Ej: Vacaciones, capacitación, licencia médica..."
@@ -228,8 +230,8 @@ export function ScheduleBlockDialog({
                                 </div>
                             ) : affected.length > 0 ? (
                                 <>
-                                    <div className="flex items-center gap-2 px-3 py-2 bg-amber-500/10 border-b border-amber-500/20">
-                                        <AlertTriangle className="h-3.5 w-3.5 text-amber-600 shrink-0" />
+                                    <div className="flex items-center gap-2 px-3 py-2 bg-amber-500/10 dark:bg-amber-500/20 border-b border-amber-500/20 dark:border-amber-500/30">
+                                        <AlertTriangle className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
                                         <p className="text-xs font-medium text-amber-700 dark:text-amber-400">
                                             Se cancelarán {affected.length} {affected.length === 1 ? 'cita' : 'citas'} automáticamente
                                         </p>

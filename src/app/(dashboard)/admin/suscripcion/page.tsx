@@ -60,8 +60,8 @@ const PLAN_ICONS: Record<SubscriptionPlan, React.ReactNode> = {
 const PLAN_COLORS: Record<SubscriptionPlan, { gradient: string; accent: string; badge: string }> = {
     starter: {
         gradient: 'from-blue-500/10 via-blue-400/5 to-transparent',
-        accent: 'text-blue-500',
-        badge: 'bg-blue-500/10 text-blue-600 hover:bg-blue-500/20',
+        accent: 'text-blue-500 dark:text-blue-400',
+        badge: 'bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 dark:hover:bg-blue-500/30',
     },
     professional: {
         gradient: 'from-primary/10 via-primary/5 to-transparent',
@@ -70,8 +70,8 @@ const PLAN_COLORS: Record<SubscriptionPlan, { gradient: string; accent: string; 
     },
     enterprise: {
         gradient: 'from-amber-500/10 via-amber-400/5 to-transparent',
-        accent: 'text-amber-500',
-        badge: 'bg-amber-500/10 text-amber-600 hover:bg-amber-500/20',
+        accent: 'text-amber-500 dark:text-amber-400',
+        badge: 'bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 dark:hover:bg-amber-500/30',
     },
 };
 
@@ -84,9 +84,9 @@ const STATUS_CONFIG: Record<string, { label: string; variant: 'default' | 'secon
 };
 
 const PAYMENT_STATUS_CONFIG: Record<string, { label: string; className: string }> = {
-    approved: { label: 'Aprobado', className: 'bg-green-500/10 text-green-600' },
-    pending: { label: 'Pendiente', className: 'bg-yellow-500/10 text-yellow-600' },
-    rejected: { label: 'Rechazado', className: 'bg-red-500/10 text-red-600' },
+    approved: { label: 'Aprobado', className: 'bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' },
+    pending: { label: 'Pendiente', className: 'bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400' },
+    rejected: { label: 'Rechazado', className: 'bg-red-500/10 dark:bg-red-500/20 text-red-600 dark:text-red-400' },
 };
 
 const PLANS_ORDER: SubscriptionPlan[] = ['starter', 'professional', 'enterprise'];
@@ -171,7 +171,7 @@ export default function SubscriptionPage() {
 
                 <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div className="space-y-1">
-                        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-3">
+                        <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
                             <CreditCard className="h-7 w-7 text-primary" />
                             Suscripción
                         </h1>
@@ -199,7 +199,7 @@ export default function SubscriptionPage() {
                     return (
                         <Card
                             key={planKey}
-                            className={`relative overflow-hidden border-border/50 transition-all duration-300 hover:shadow-lg ${
+                            className={`relative overflow-hidden border-border/50 transition-[box-shadow] duration-300 hover:shadow-lg ${
                                 isCurrentPlan ? 'ring-2 ring-primary shadow-lg shadow-primary/10' : ''
                             } ${isPopular ? 'md:-translate-y-2' : ''}`}
                         >
@@ -300,7 +300,7 @@ export default function SubscriptionPage() {
                 >
                     <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-primary to-accent/40" />
                     <CardHeader className="pb-4">
-                        <CardTitle className="flex items-center gap-2 text-lg">
+                        <CardTitle className="flex items-center gap-2 text-base">
                             <CalendarDays className="h-5 w-5 text-primary" />
                             Detalles de tu suscripción
                         </CardTitle>
@@ -358,8 +358,8 @@ export default function SubscriptionPage() {
                 >
                     <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-emerald-500 to-emerald-400/40" />
                     <CardHeader className="pb-4">
-                        <CardTitle className="flex items-center gap-2 text-lg">
-                            <Receipt className="h-5 w-5 text-emerald-500" />
+                        <CardTitle className="flex items-center gap-2 text-base">
+                            <Receipt className="h-5 w-5 text-emerald-500 dark:text-emerald-400" />
                             Historial de pagos
                         </CardTitle>
                     </CardHeader>

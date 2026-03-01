@@ -36,7 +36,7 @@ function DashboardContent() {
 
                 <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div className="space-y-1">
-                        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                        <h1 className="text-2xl sm:text-3xl font-bold">
                             <Suspense fallback="Hola"><Greeting /></Suspense>
                         </h1>
                         <p className="text-muted-foreground flex items-center gap-2">
@@ -61,9 +61,9 @@ function DashboardContent() {
                     className="group"
                     style={{ animation: 'fadeIn 0.4s ease-out 0.05s both' }}
                 >
-                    <Card className="h-full relative overflow-hidden border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 hover:-translate-y-0.5">
+                    <Card className="h-full relative overflow-hidden border-border/50 hover:shadow-lg hover:shadow-primary/5 transition-[box-shadow,transform] duration-300 hover:-translate-y-0.5">
                         <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-primary to-primary/40" />
-                        <CardContent className="p-6">
+                        <CardContent className="p-5">
                             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 mb-4 group-hover:bg-primary/15 transition-colors">
                                 <Search className="h-6 w-6 text-primary" />
                             </div>
@@ -78,9 +78,9 @@ function DashboardContent() {
                     className="group"
                     style={{ animation: 'fadeIn 0.4s ease-out 0.1s both' }}
                 >
-                    <Card className="h-full relative overflow-hidden border-border/50 hover:shadow-lg hover:shadow-accent/5 transition-all duration-300 hover:-translate-y-0.5">
+                    <Card className="h-full relative overflow-hidden border-border/50 hover:shadow-lg hover:shadow-accent/5 transition-[box-shadow,transform] duration-300 hover:-translate-y-0.5">
                         <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-accent to-accent/40" />
-                        <CardContent className="p-6">
+                        <CardContent className="p-5">
                             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 mb-4 group-hover:bg-accent/15 transition-colors">
                                 <Calendar className="h-6 w-6 text-accent" />
                             </div>
@@ -95,11 +95,11 @@ function DashboardContent() {
                     className="group"
                     style={{ animation: 'fadeIn 0.4s ease-out 0.15s both' }}
                 >
-                    <Card className="h-full relative overflow-hidden border-border/50 hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-300 hover:-translate-y-0.5">
+                    <Card className="h-full relative overflow-hidden border-border/50 hover:shadow-lg hover:shadow-emerald-500/5 transition-[box-shadow,transform] duration-300 hover:-translate-y-0.5">
                         <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-emerald-500 to-emerald-400/40" />
-                        <CardContent className="p-6">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/10 mb-4 group-hover:bg-emerald-500/15 transition-colors">
-                                <Clock className="h-6 w-6 text-emerald-500" />
+                        <CardContent className="p-5">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 mb-4 group-hover:bg-emerald-500/15 transition-colors">
+                                <Clock className="h-6 w-6 text-emerald-500 dark:text-emerald-400" />
                             </div>
                             <h3 className="font-semibold group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">Historial</h3>
                             <p className="text-xs text-muted-foreground mt-1">Revisa visitas anteriores</p>

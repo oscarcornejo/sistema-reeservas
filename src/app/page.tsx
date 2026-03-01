@@ -179,7 +179,7 @@ function HeroSection() {
                     </div>
 
                     <h1
-                        className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-5"
+                        className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-balance mb-5"
                         style={{ animation: 'fadeIn 0.4s ease-out 0.05s both' }}
                     >
                         Agenda tus citas de forma{' '}
@@ -234,7 +234,7 @@ function HowItWorksSection() {
                         Cómo funciona
                     </div>
                     <h2
-                        className="text-3xl sm:text-4xl font-bold tracking-tight mb-3"
+                        className="text-3xl sm:text-4xl font-bold tracking-tight text-balance mb-3"
                         style={{ animation: 'fadeIn 0.4s ease-out 0.05s both' }}
                     >
                         Reserva en{' '}
@@ -291,7 +291,7 @@ function CategoriesSection() {
                         Categorías
                     </div>
                     <h2
-                        className="text-3xl sm:text-4xl font-bold tracking-tight mb-3"
+                        className="text-3xl sm:text-4xl font-bold tracking-tight text-balance mb-3"
                         style={{ animation: 'fadeIn 0.4s ease-out 0.05s both' }}
                     >
                         Explora por{' '}
@@ -315,7 +315,7 @@ function CategoriesSection() {
                             className="group"
                             style={{ animation: `fadeIn 0.4s ease-out ${0.15 + i * 0.03}s both` }}
                         >
-                            <Card className="relative overflow-hidden border-border/50 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 hover:-translate-y-1">
+                            <Card className="relative overflow-hidden border-border/50 hover:shadow-xl hover:shadow-primary/5 transition-[box-shadow,transform,border-color] duration-300 hover:-translate-y-1">
                                 <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-primary to-accent/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                                 <CardContent className="flex flex-col items-center py-8 px-4">
                                     <span className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300">
@@ -350,7 +350,7 @@ function BenefitsSection() {
                         Para negocios
                     </div>
                     <h2
-                        className="text-3xl sm:text-4xl font-bold tracking-tight mb-3"
+                        className="text-3xl sm:text-4xl font-bold tracking-tight text-balance mb-3"
                         style={{ animation: 'fadeIn 0.4s ease-out 0.05s both' }}
                     >
                         Todo lo que necesitas para{' '}
@@ -370,7 +370,7 @@ function BenefitsSection() {
                     {BENEFITS.map((benefit, i) => (
                         <Card
                             key={benefit.title}
-                            className="group relative overflow-hidden border-border/50 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 hover:-translate-y-1"
+                            className="group relative overflow-hidden border-border/50 hover:shadow-xl hover:shadow-primary/5 transition-[box-shadow,transform,border-color] duration-300 hover:-translate-y-1"
                             style={{ animation: `fadeIn 0.4s ease-out ${0.15 + i * 0.05}s both` }}
                         >
                             <div className={`absolute top-0 left-0 h-1 w-full bg-gradient-to-r ${benefit.gradient}`} />
@@ -409,7 +409,7 @@ function CtaSection() {
                     className="max-w-2xl mx-auto text-center"
                     style={{ animation: 'fadeIn 0.4s ease-out' }}
                 >
-                    <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
+                    <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-balance mb-4">
                         Empieza hoy con{' '}
                         <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                             TurnoPro

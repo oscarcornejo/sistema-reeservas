@@ -23,7 +23,7 @@ export default function Error({
                     <div className="flex h-16 w-16 mx-auto items-center justify-center rounded-2xl bg-destructive/10 text-destructive mb-4">
                         <span className="text-2xl font-bold">!</span>
                     </div>
-                    <h2 className="text-xl font-bold">Algo salió mal</h2>
+                    <h2 className="text-xl font-bold text-balance">Algo salió mal</h2>
                     <p className="text-sm text-muted-foreground mt-2">
                         Ocurrió un error inesperado. Por favor, intenta nuevamente.
                     </p>

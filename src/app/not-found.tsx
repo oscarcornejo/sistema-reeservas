@@ -17,7 +17,7 @@ export default function NotFound() {
                     <div className="text-[120px] sm:text-[160px] font-bold leading-none bg-gradient-to-b from-primary/20 to-primary/5 bg-clip-text text-transparent select-none">
                         404
                     </div>
-                    <h2 className="text-xl sm:text-2xl font-bold -mt-4">
+                    <h2 className="text-xl sm:text-2xl font-bold text-balance -mt-4">
                         Página no encontrada
                     </h2>
                     <p className="text-sm text-muted-foreground mt-2">

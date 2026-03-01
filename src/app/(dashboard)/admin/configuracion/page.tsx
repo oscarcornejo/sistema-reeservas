@@ -170,7 +170,7 @@ export default function ConfiguracionPage() {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-8">
             {/* ── Header con banner gradiente ── */}
             <div
                 className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/8 via-background to-accent/6 border border-border/50 p-6"
@@ -180,7 +180,7 @@ export default function ConfiguracionPage() {
                 <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-accent/6 blur-3xl" />
 
                 <div className="relative space-y-1">
-                    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-3">
+                    <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
                         <Settings className="h-7 w-7 text-primary" />
                         Configuración
                     </h1>
@@ -267,7 +267,7 @@ export default function ConfiguracionPage() {
                                         name="category"
                                         defaultValue={business.category}
                                     >
-                                        <SelectTrigger>
+                                        <SelectTrigger id="category">
                                             <SelectValue placeholder="Selecciona categoría" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -291,7 +291,7 @@ export default function ConfiguracionPage() {
                 {/* ============ Tab: Ubicación ============ */}
                 <TabsContent value="ubicacion">
                     <Card className="relative overflow-hidden border-border/50">
-                        <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-blue-500 to-blue-400/40" />
+                        <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-blue-500 to-blue-400/40 dark:from-blue-400 dark:to-blue-500/40" />
                         <CardHeader>
                             <CardTitle>Ubicación y contacto</CardTitle>
                             <CardDescription>
@@ -416,7 +416,7 @@ export default function ConfiguracionPage() {
                 {/* ============ Tab: Horarios ============ */}
                 <TabsContent value="horarios">
                     <Card className="relative overflow-hidden border-border/50">
-                        <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-emerald-500 to-emerald-400/40" />
+                        <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-emerald-500 to-emerald-400/40 dark:from-emerald-400 dark:to-emerald-500/40" />
                         <CardHeader>
                             <CardTitle>Horarios de trabajo</CardTitle>
                             <CardDescription>
@@ -485,7 +485,7 @@ export default function ConfiguracionPage() {
                 {/* ============ Tab: Pagos y preferencias ============ */}
                 <TabsContent value="pagos">
                     <Card className="relative overflow-hidden border-border/50">
-                        <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-amber-500 to-amber-400/40" />
+                        <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-amber-500 to-amber-400/40 dark:from-amber-400 dark:to-amber-500/40" />
                         <CardHeader>
                             <CardTitle>Pagos y políticas</CardTitle>
                             <CardDescription>
@@ -501,7 +501,7 @@ export default function ConfiguracionPage() {
                                             name="timezone"
                                             defaultValue={business.timezone}
                                         >
-                                            <SelectTrigger>
+                                            <SelectTrigger id="timezone">
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -519,7 +519,7 @@ export default function ConfiguracionPage() {
                                             name="currency"
                                             defaultValue={business.currency}
                                         >
-                                            <SelectTrigger>
+                                            <SelectTrigger id="currency">
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -628,7 +628,7 @@ export default function ConfiguracionPage() {
                 {/* ============ Tab: Publicación ============ */}
                 <TabsContent value="publicacion">
                     <Card className="relative overflow-hidden border-border/50">
-                        <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-purple-500 to-purple-400/40" />
+                        <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-accent to-accent/40 dark:from-accent dark:to-accent/40" />
                         <CardHeader>
                             <CardTitle>Visibilidad pública</CardTitle>
                             <CardDescription>

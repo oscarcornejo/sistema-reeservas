@@ -57,8 +57,8 @@ const ROLE_LABELS: Record<string, string> = {
 /** Colores de badge por rol */
 const ROLE_COLORS: Record<string, string> = {
     admin: 'bg-primary/10 text-primary hover:bg-primary/20',
-    professional: 'bg-blue-500/10 text-blue-600 hover:bg-blue-500/20',
-    client: 'bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20',
+    professional: 'bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 dark:hover:bg-blue-500/30',
+    client: 'bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 dark:hover:bg-emerald-500/30',
 };
 
 /** Opciones de locale */
@@ -221,7 +221,7 @@ export default function ProfilePage() {
                     </div>
                     <div className="space-y-1.5">
                         <div className="flex items-center gap-2.5 flex-wrap">
-                            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{profile.name}</h1>
+                            <h1 className="text-2xl sm:text-3xl font-bold">{profile.name}</h1>
                             <Badge className={`text-[10px] border-0 ${ROLE_COLORS[profile.role] || 'bg-muted text-muted-foreground'}`}>
                                 {ROLE_LABELS[profile.role]}
                             </Badge>
@@ -311,7 +311,7 @@ export default function ProfilePage() {
                     <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-blue-500 to-blue-400/40" />
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2 text-base">
-                            <UserCircle className="h-4.5 w-4.5 text-blue-500" />
+                            <UserCircle className="h-4.5 w-4.5 text-blue-500 dark:text-blue-400" />
                             Información personal
                         </CardTitle>
                         <CardDescription>
@@ -368,7 +368,7 @@ export default function ProfilePage() {
                     <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-emerald-500 to-emerald-400/40" />
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2 text-base">
-                            <Globe className="h-4.5 w-4.5 text-emerald-500" />
+                            <Globe className="h-4.5 w-4.5 text-emerald-500 dark:text-emerald-400" />
                             Preferencias
                         </CardTitle>
                         <CardDescription>
@@ -382,7 +382,7 @@ export default function ProfilePage() {
                                 name="preferredLocale"
                                 defaultValue={profile.preferredLocale}
                             >
-                                <SelectTrigger className="border-border/60">
+                                <SelectTrigger id="preferredLocale" className="border-border/60">
                                     <SelectValue placeholder="Selecciona idioma" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -435,7 +435,7 @@ export default function ProfilePage() {
                     <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-amber-500 to-amber-400/40" />
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2 text-base">
-                            <Shield className="h-4.5 w-4.5 text-amber-500" />
+                            <Shield className="h-4.5 w-4.5 text-amber-500 dark:text-amber-400" />
                             Cambiar contraseña
                         </CardTitle>
                         <CardDescription>
