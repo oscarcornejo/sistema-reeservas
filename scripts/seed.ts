@@ -32,6 +32,7 @@ import Professional from '../src/lib/db/models/professional';
 import Client from '../src/lib/db/models/client';
 import Appointment from '../src/lib/db/models/appointment';
 import Subscription from '../src/lib/db/models/subscription';
+import ServiceCategory from '../src/lib/db/models/service-category';
 
 // =============================================================================
 // Guarda de entorno — NUNCA ejecutar en produccion
@@ -93,6 +94,7 @@ async function seed() {
         Client.deleteMany({}),
         Appointment.deleteMany({}),
         Subscription.deleteMany({}),
+        ServiceCategory.deleteMany({}),
     ]);
 
     // ── Hash del password ──────────────────────────────────────────────────
@@ -242,6 +244,21 @@ async function seed() {
             subscriptionPlan: 'starter',
             isPublished: true,
         },
+    ]);
+
+    // ════════════════════════════════════════════════════════════════════════
+    // 2.5 CATEGORÍAS DE SERVICIO (6)
+    // ════════════════════════════════════════════════════════════════════════
+    console.log('📂 Creando categorías de servicio...');
+    await ServiceCategory.insertMany([
+        // --- Barberia El Clasico ---
+        { businessId: business1._id, name: 'Cortes', order: 1, isActive: true },
+        { businessId: business1._id, name: 'Barba', order: 2, isActive: true },
+        { businessId: business1._id, name: 'Tratamientos', order: 3, isActive: true },
+        // --- Serenity Spa ---
+        { businessId: business2._id, name: 'Masajes', order: 1, isActive: true },
+        { businessId: business2._id, name: 'Faciales', order: 2, isActive: true },
+        { businessId: business2._id, name: 'Manos y Pies', order: 3, isActive: true },
     ]);
 
     // ════════════════════════════════════════════════════════════════════════
@@ -727,6 +744,7 @@ async function seed() {
         clientes: await Client.countDocuments(),
         citas: await Appointment.countDocuments(),
         suscripciones: await Subscription.countDocuments(),
+        categorias: await ServiceCategory.countDocuments(),
     };
 
     console.log('\n🎉 Seed completado exitosamente!\n');

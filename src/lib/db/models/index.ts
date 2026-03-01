@@ -12,3 +12,4 @@ export { default as Appointment } from './appointment';
 export { default as Subscription } from './subscription';
 export { default as Notification } from './notification';
 export { default as ScheduleBlock } from './schedule-block';
+export { default as ServiceCategory } from './service-category';

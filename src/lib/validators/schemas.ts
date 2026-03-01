@@ -67,6 +67,18 @@ export const serviceSchema = z.object({
 });
 
 // =============================================================================
+// Categorías de servicio
+// =============================================================================
+
+/** Schema para crear/editar categoría de servicio */
+export const serviceCategorySchema = z.object({
+    name: z
+        .string()
+        .min(2, 'El nombre debe tener al menos 2 caracteres')
+        .max(100, 'Máximo 100 caracteres'),
+});
+
+// =============================================================================
 // Citas
 // =============================================================================
 
@@ -253,6 +265,7 @@ export const changePasswordSchema = z.object({
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type ServiceInput = z.infer<typeof serviceSchema>;
+export type ServiceCategoryInput = z.infer<typeof serviceCategorySchema>;
 export type AppointmentInput = z.infer<typeof createAppointmentSchema>;
 export type PublicBookingInput = z.infer<typeof publicBookingSchema>;
 export type ProfessionalInput = z.infer<typeof professionalSchema>;

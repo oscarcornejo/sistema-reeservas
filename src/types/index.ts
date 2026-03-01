@@ -213,6 +213,26 @@ export interface IService {
   updatedAt: Date;
 }
 
+export interface IServiceCategory {
+  _id: Types.ObjectId;
+  businessId: Types.ObjectId;
+  name: string;
+  order: number;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface IServiceCategorySerialized {
+  _id: string;
+  businessId: string;
+  name: string;
+  order: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface IAppointment {
   _id: Types.ObjectId;
   businessId: Types.ObjectId;
