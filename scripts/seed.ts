@@ -2,14 +2,15 @@
  * @fileoverview Script de seed para poblar la BD con datos de prueba.
  *
  * Crea un ecosistema completo:
- * - 7 usuarios (2 admin, 3 profesionales, 2 clientes)
- * - 2 negocios (barbería + spa)
- * - 8 servicios (5 barbería + 3 spa)
- * - 3 profesionales (2 barbería + 1 spa)
- * - 3 clientes (2 en barbería + 1 en spa)
- * - 11 citas (todos los estados cubiertos: pending, confirmed, in-progress, completed, cancelled, no-show)
- * - 2 suscripciones (professional + trial)
+ * - 10 usuarios (3 admin, 4 profesionales, 3 clientes)
+ * - 3 negocios (barbería + spa + clínica dental enterprise)
+ * - 11 servicios (5 barbería + 3 spa + 3 clínica)
+ * - 4 profesionales (2 barbería + 1 spa + 1 clínica)
+ * - 4 clientes (2 en barbería + 1 en spa + 1 en clínica)
+ * - 14 citas (todos los estados cubiertos: pending, confirmed, in-progress, completed, cancelled, no-show)
+ * - 3 suscripciones (professional + trial + enterprise)
  *
+ * Admins: admin@turnopro.cl (professional), ana@serenityspa.cl (starter/trial), roberto@dentalcorp.cl (enterprise)
  * Todos los passwords son: Password123
  *
  * Uso: npm run seed
@@ -105,9 +106,9 @@ async function seed() {
     // ════════════════════════════════════════════════════════════════════════
     console.log('👤 Creando usuarios...');
     const [
-        adminUser, adminUser2,
-        proUser1, proUser2, proUser3,
-        clientUser1, clientUser2,
+        adminUser, adminUser2, adminUser3,
+        proUser1, proUser2, proUser3, proUser4,
+        clientUser1, clientUser2, clientUser3,
     ] = await User.insertMany([
         {
             email: 'admin@turnopro.cl',
@@ -123,6 +124,15 @@ async function seed() {
             password: hashedPassword,
             name: 'Ana Directora',
             phone: '+56 9 1111 3333',
+            role: 'admin',
+            isActive: true,
+            emailVerified: new Date(),
+        },
+        {
+            email: 'roberto@dentalcorp.cl',
+            password: hashedPassword,
+            name: 'Roberto Muñoz',
+            phone: '+56 9 1111 4444',
             role: 'admin',
             isActive: true,
             emailVerified: new Date(),
@@ -155,6 +165,15 @@ async function seed() {
             emailVerified: new Date(),
         },
         {
+            email: 'sofia@dentalcorp.cl',
+            password: hashedPassword,
+            name: 'Sofia Herrera',
+            phone: '+56 9 5555 8888',
+            role: 'professional',
+            isActive: true,
+            emailVerified: new Date(),
+        },
+        {
             email: 'maria@cliente.cl',
             password: hashedPassword,
             name: 'Maria Garcia',
@@ -172,13 +191,22 @@ async function seed() {
             isActive: true,
             emailVerified: new Date(),
         },
+        {
+            email: 'andrea@cliente.cl',
+            password: hashedPassword,
+            name: 'Andrea Vidal',
+            phone: '+56 9 8888 1111',
+            role: 'client',
+            isActive: true,
+            emailVerified: new Date(),
+        },
     ]);
 
     // ════════════════════════════════════════════════════════════════════════
     // 2. NEGOCIOS (2)
     // ════════════════════════════════════════════════════════════════════════
     console.log('🏢 Creando negocios...');
-    const [business1, business2] = await Business.insertMany([
+    const [business1, business2, business3] = await Business.insertMany([
         {
             adminId: adminUser._id,
             name: 'Barberia El Clasico',
@@ -244,6 +272,41 @@ async function seed() {
             subscriptionPlan: 'starter',
             isPublished: true,
         },
+        {
+            adminId: adminUser3._id,
+            name: 'DentalCorp Chile',
+            slug: 'dentalcorp-chile',
+            description:
+                'Clinica dental premium con tecnologia de ultima generacion. Ortodoncia, implantes y estetica dental.',
+            category: 'Clinica Dental',
+            address: 'Av. Las Condes 9876, Las Condes',
+            city: 'Santiago',
+            state: 'Region Metropolitana',
+            country: 'CL',
+            location: {
+                type: 'Point',
+                coordinates: [-70.5680, -33.4050],
+            },
+            phone: '+56 2 3456 7890',
+            email: 'contacto@dentalcorp.cl',
+            website: 'https://dentalcorp.cl',
+            workingHours: [
+                { dayOfWeek: 0, isOpen: false, openTime: '00:00', closeTime: '00:00' },
+                { dayOfWeek: 1, isOpen: true, openTime: '08:00', closeTime: '20:00' },
+                { dayOfWeek: 2, isOpen: true, openTime: '08:00', closeTime: '20:00' },
+                { dayOfWeek: 3, isOpen: true, openTime: '08:00', closeTime: '20:00' },
+                { dayOfWeek: 4, isOpen: true, openTime: '08:00', closeTime: '20:00' },
+                { dayOfWeek: 5, isOpen: true, openTime: '08:00', closeTime: '20:00' },
+                { dayOfWeek: 6, isOpen: true, openTime: '09:00', closeTime: '14:00' },
+            ],
+            subscriptionStatus: 'active',
+            subscriptionPlan: 'enterprise',
+            subscriptionExpiresAt: monthsFromNow(12),
+            allowOnlinePayments: true,
+            requirePaymentUpfront: true,
+            cancellationPolicy: 'Cancelaciones con al menos 24 horas de anticipacion. Cancelaciones tardias generan un cargo del 50%.',
+            isPublished: true,
+        },
     ]);
 
     // ════════════════════════════════════════════════════════════════════════
@@ -259,6 +322,10 @@ async function seed() {
         { businessId: business2._id, name: 'Masajes', order: 1, isActive: true },
         { businessId: business2._id, name: 'Faciales', order: 2, isActive: true },
         { businessId: business2._id, name: 'Manos y Pies', order: 3, isActive: true },
+        // --- DentalCorp Chile ---
+        { businessId: business3._id, name: 'Consultas', order: 1, isActive: true },
+        { businessId: business3._id, name: 'Ortodoncia', order: 2, isActive: true },
+        { businessId: business3._id, name: 'Estetica Dental', order: 3, isActive: true },
     ]);
 
     // ════════════════════════════════════════════════════════════════════════
@@ -356,6 +423,40 @@ async function seed() {
             isActive: true,
             order: 3,
         },
+        // --- DentalCorp Chile (3) ---
+        {
+            businessId: business3._id,
+            name: 'Consulta General',
+            description: 'Evaluacion dental completa con radiografia panoramica',
+            category: 'Consultas',
+            duration: 30,
+            price: 25000,
+            currency: 'CLP',
+            isActive: true,
+            order: 1,
+        },
+        {
+            businessId: business3._id,
+            name: 'Limpieza Dental',
+            description: 'Limpieza profunda con ultrasonido y pulido',
+            category: 'Estetica Dental',
+            duration: 45,
+            price: 35000,
+            currency: 'CLP',
+            isActive: true,
+            order: 2,
+        },
+        {
+            businessId: business3._id,
+            name: 'Blanqueamiento LED',
+            description: 'Blanqueamiento dental con tecnologia LED de ultima generacion',
+            category: 'Estetica Dental',
+            duration: 90,
+            price: 120000,
+            currency: 'CLP',
+            isActive: true,
+            order: 3,
+        },
     ]);
 
     // ════════════════════════════════════════════════════════════════════════
@@ -381,7 +482,19 @@ async function seed() {
         slots: [{ start: '10:00', end: '19:00' }],
     }));
 
-    const [pro1, pro2, pro3] = await Professional.insertMany([
+    // Horario clínica: Lun-Vie con pausa + Sábado mañana
+    const clinicHours = [
+        ...[1, 2, 3, 4, 5].map((day) => ({
+            dayOfWeek: day,
+            slots: [
+                { start: '08:00', end: '13:00' },
+                { start: '14:00', end: '20:00' },
+            ],
+        })),
+        { dayOfWeek: 6, slots: [{ start: '09:00', end: '14:00' }] },
+    ];
+
+    const [pro1, pro2, pro3, pro4] = await Professional.insertMany([
         {
             userId: proUser1._id,
             businessId: business1._id,
@@ -418,13 +531,25 @@ async function seed() {
             rating: 4.7,
             totalReviews: 64,
         },
+        {
+            userId: proUser4._id,
+            businessId: business3._id,
+            displayName: 'Dra. Sofia Herrera',
+            specialties: ['Ortodoncia', 'Estetica dental', 'Implantes'],
+            bio: 'Odontologo con magister en ortodoncia y estetica dental. 10 anos de experiencia.',
+            services: [services[8]._id, services[9]._id, services[10]._id],
+            availableHours: clinicHours,
+            isActive: true,
+            rating: 4.9,
+            totalReviews: 215,
+        },
     ]);
 
     // ════════════════════════════════════════════════════════════════════════
     // 5. CLIENTES (3)
     // ════════════════════════════════════════════════════════════════════════
     console.log('🧑 Creando clientes...');
-    const [client1, client2, client3] = await Client.insertMany([
+    const [client1, client2, client3, client4] = await Client.insertMany([
         {
             userId: clientUser1._id,
             businessId: business1._id,
@@ -493,6 +618,37 @@ async function seed() {
                     date: daysFromNow(-7),
                     serviceName: 'Masaje Relajante',
                     professionalName: 'Camila Reyes',
+                },
+            ],
+        },
+        {
+            userId: clientUser3._id,
+            businessId: business3._id,
+            name: 'Andrea Vidal',
+            email: 'andrea@cliente.cl',
+            phone: '+56 9 8888 1111',
+            notes: 'Paciente de ortodoncia, control cada 4 semanas',
+            tags: ['Frecuente', 'Ortodoncia'],
+            source: 'online',
+            totalSpent: 310000,
+            totalVisits: 8,
+            lastVisit: daysFromNow(-5),
+            visitHistory: [
+                {
+                    date: daysFromNow(-5),
+                    serviceName: 'Consulta General',
+                    professionalName: 'Dra. Sofia Herrera',
+                    notes: 'Control de brackets mensual',
+                },
+                {
+                    date: daysFromNow(-35),
+                    serviceName: 'Consulta General',
+                    professionalName: 'Dra. Sofia Herrera',
+                },
+                {
+                    date: daysFromNow(-60),
+                    serviceName: 'Limpieza Dental',
+                    professionalName: 'Dra. Sofia Herrera',
                 },
             ],
         },
@@ -685,6 +841,59 @@ async function seed() {
             rating: 5,
             review: 'Increible experiencia, muy relajante',
         },
+        // --- Citas DentalCorp (business 3 — enterprise) ---
+        {
+            // confirmed — hoy
+            businessId: business3._id,
+            clientId: client4._id,
+            professionalId: pro4._id,
+            serviceId: services[8]._id,
+            date: today(),
+            startTime: '10:00',
+            endTime: '10:30',
+            duration: 30,
+            status: 'confirmed',
+            paymentStatus: 'pending',
+            paymentMethod: 'card',
+            paymentAmount: 25000,
+            clientNotes: 'Control mensual de brackets',
+        },
+        {
+            // pending — futuro
+            businessId: business3._id,
+            clientId: client4._id,
+            professionalId: pro4._id,
+            serviceId: services[10]._id,
+            date: daysFromNow(3),
+            startTime: '15:00',
+            endTime: '16:30',
+            duration: 90,
+            status: 'pending',
+            paymentStatus: 'pending',
+            paymentAmount: 120000,
+            clientNotes: 'Blanqueamiento post-brackets',
+        },
+        {
+            // completed — pasada, con review
+            businessId: business3._id,
+            clientId: client4._id,
+            professionalId: pro4._id,
+            serviceId: services[9]._id,
+            date: daysFromNow(-5),
+            startTime: '09:00',
+            endTime: '09:45',
+            duration: 45,
+            status: 'completed',
+            paymentStatus: 'paid',
+            paymentMethod: 'mercadopago',
+            paymentAmount: 35000,
+            mercadopagoPaymentId: 'MP-TEST-DENTAL-001',
+            rating: 5,
+            review: 'Excelente atencion, muy profesional la doctora',
+            remindersSent: [
+                { type: 'email', sentAt: daysFromNow(-6), status: 'sent' },
+            ],
+        },
     ]);
 
     // ════════════════════════════════════════════════════════════════════════
@@ -731,6 +940,54 @@ async function seed() {
             amount: 0,
             currency: 'CLP',
         },
+        {
+            businessId: business3._id,
+            plan: 'enterprise',
+            status: 'active',
+            startDate: monthsFromNow(-12),
+            endDate: monthsFromNow(12),
+            amount: 49990,
+            currency: 'CLP',
+            mercadopagoPreapprovalId: 'MP-SUB-TEST-003',
+            paymentHistory: [
+                {
+                    date: monthsFromNow(-12),
+                    amount: 49990,
+                    status: 'approved',
+                    mercadopagoPaymentId: 'MP-PAY-ENT-001',
+                },
+                {
+                    date: monthsFromNow(-11),
+                    amount: 49990,
+                    status: 'approved',
+                    mercadopagoPaymentId: 'MP-PAY-ENT-002',
+                },
+                {
+                    date: monthsFromNow(-10),
+                    amount: 49990,
+                    status: 'approved',
+                    mercadopagoPaymentId: 'MP-PAY-ENT-003',
+                },
+                {
+                    date: monthsFromNow(-9),
+                    amount: 49990,
+                    status: 'approved',
+                    mercadopagoPaymentId: 'MP-PAY-ENT-004',
+                },
+                {
+                    date: monthsFromNow(-8),
+                    amount: 49990,
+                    status: 'approved',
+                    mercadopagoPaymentId: 'MP-PAY-ENT-005',
+                },
+                {
+                    date: monthsFromNow(-7),
+                    amount: 49990,
+                    status: 'approved',
+                    mercadopagoPaymentId: 'MP-PAY-ENT-006',
+                },
+            ],
+        },
     ]);
 
     // ════════════════════════════════════════════════════════════════════════
@@ -751,17 +1008,20 @@ async function seed() {
     console.log('📊 Resumen:');
     console.table(counts);
     console.log('\n🔑 Credenciales de acceso:');
-    console.log('┌───────────────────────────┬──────────────────────────┬────────────────┐');
-    console.log('│ Rol                       │ Email                    │ Password       │');
-    console.log('├───────────────────────────┼──────────────────────────┼────────────────┤');
-    console.log('│ Admin (Barberia)          │ admin@turnopro.cl        │ Password123    │');
-    console.log('│ Admin (Spa)               │ ana@serenityspa.cl       │ Password123    │');
-    console.log('│ Profesional (Pedro)       │ pedro@turnopro.cl        │ Password123    │');
-    console.log('│ Profesional (Laura)       │ laura@turnopro.cl        │ Password123    │');
-    console.log('│ Profesional (Camila)      │ camila@serenityspa.cl    │ Password123    │');
-    console.log('│ Cliente (Maria)           │ maria@cliente.cl         │ Password123    │');
-    console.log('│ Cliente (Juan)            │ juan@cliente.cl          │ Password123    │');
-    console.log('└───────────────────────────┴──────────────────────────┴────────────────┘');
+    console.log('┌──────────────────────────────────┬──────────────────────────┬────────────────┐');
+    console.log('│ Rol                              │ Email                    │ Password       │');
+    console.log('├──────────────────────────────────┼──────────────────────────┼────────────────┤');
+    console.log('│ Admin (Barberia - professional)  │ admin@turnopro.cl        │ Password123    │');
+    console.log('│ Admin (Spa - starter/trial)      │ ana@serenityspa.cl       │ Password123    │');
+    console.log('│ Admin (Dental - enterprise)      │ roberto@dentalcorp.cl    │ Password123    │');
+    console.log('│ Profesional (Pedro)              │ pedro@turnopro.cl        │ Password123    │');
+    console.log('│ Profesional (Laura)              │ laura@turnopro.cl        │ Password123    │');
+    console.log('│ Profesional (Camila)             │ camila@serenityspa.cl    │ Password123    │');
+    console.log('│ Profesional (Sofia)              │ sofia@dentalcorp.cl      │ Password123    │');
+    console.log('│ Cliente (Maria)                  │ maria@cliente.cl         │ Password123    │');
+    console.log('│ Cliente (Juan)                   │ juan@cliente.cl          │ Password123    │');
+    console.log('│ Cliente (Andrea)                 │ andrea@cliente.cl        │ Password123    │');
+    console.log('└──────────────────────────────────┴──────────────────────────┴────────────────┘');
 
     await mongoose.disconnect();
     console.log('\n🔌 Desconectado de MongoDB');

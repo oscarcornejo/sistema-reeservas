@@ -33,10 +33,12 @@ interface WindowEntry {
 // ─── Límites predefinidos ───────────────────────────────────────────────────────
 
 export const RATE_LIMITS = {
-    /** Login: 5 intentos / 15 min */
+    /** Login por email (fuerza bruta): 5 intentos / 15 min */
     auth: { windowMs: 15 * 60 * 1000, maxRequests: 5 },
-    /** Registro: 3 intentos / 15 min */
-    register: { windowMs: 15 * 60 * 1000, maxRequests: 3 },
+    /** Login por IP (abuso masivo): 20 intentos / 15 min */
+    authByIp: { windowMs: 15 * 60 * 1000, maxRequests: 20 },
+    /** Registro: 5 intentos / 15 min */
+    register: { windowMs: 15 * 60 * 1000, maxRequests: 5 },
     /** Reserva pública: 10 / min */
     publicBooking: { windowMs: 60 * 1000, maxRequests: 10 },
     /** Webhook: 100 / min */

@@ -66,7 +66,7 @@ export default function DashboardLayout({
             <Suspense fallback={<div className="hidden lg:block w-[260px] border-r shrink-0 h-screen" />}>
                 <AuthSidebar />
             </Suspense>
-            <main className="flex-1 lg:pl-0 pt-14 lg:pt-0">
+            <main className="flex-1 min-w-0 lg:pl-0 pt-14 lg:pt-0">
                 <Suspense fallback={null}>
                     <AuthTopNavbar />
                 </Suspense>
