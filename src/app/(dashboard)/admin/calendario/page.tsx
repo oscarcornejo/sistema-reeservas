@@ -11,6 +11,7 @@ import {
   useCallback,
   useTransition,
   useMemo,
+  useRef,
 } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -162,8 +163,8 @@ const PROFESSIONAL_COLORS = [
   },
 ] as const;
 
-/** Horas de trabajo (8:00 - 20:00) */
-const WORK_HOURS = Array.from({ length: 13 }, (_, i) => i + 8);
+/** Horas de trabajo (8:00 - 23:30) */
+const WORK_HOURS = Array.from({ length: 16 }, (_, i) => i + 8);
 
 /** Ancho fijo en px por hora en el timeline (150 = 30min→75px legible) */
 const HOUR_WIDTH_PX = 150;
@@ -174,7 +175,7 @@ const DAY_START_MINUTES = 480;
 /** Ancho de la columna de nombres */
 const NAME_COL_WIDTH = 180;
 
-/** Todos los slots de 30 min: ["08:00","08:30",...,"20:00","20:30"] — 26 slots = 13h × 2 */
+/** Todos los slots de 30 min: ["08:00","08:30",...,"23:00","23:30"] — 32 slots = 16h × 2 */
 const HALF_HOUR_SLOTS: string[] = [];
 for (const hour of WORK_HOURS) {
   const hh = String(hour).padStart(2, "0");
@@ -749,6 +750,7 @@ export default function CalendarPage() {
           <Card className="border-border/50 overflow-hidden">
             <CardContent className="p-3">
               <CalendarWidget
+                locale={es}
                 mode="single"
                 selected={selectedDate}
                 month={selectedDate}
@@ -1193,6 +1195,7 @@ function ResourceTimelineView({
 }) {
   const totalWidth = WORK_HOURS.length * HOUR_WIDTH_PX;
   const isTodaySelected = isToday(selectedDate);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   // Minuto actual para la línea "ahora"
   const [nowMinutes, setNowMinutes] = useState(() => {
@@ -1215,6 +1218,16 @@ function ResourceTimelineView({
     nowMinutes <= DAY_START_MINUTES + WORK_HOURS.length * 60;
   const nowPx = nowInRange ? minutesToPx(nowMinutes) : 0;
 
+  // Auto-scroll para centrar la línea "ahora"
+  useEffect(() => {
+    if (!nowInRange || !scrollRef.current) return;
+    const container = scrollRef.current;
+    const scrollTarget = nowPx + NAME_COL_WIDTH - container.clientWidth / 2;
+    container.scrollLeft = Math.max(0, scrollTarget);
+  }, [nowInRange]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const nowTimeLabel = `${String(Math.floor(nowMinutes / 60)).padStart(2, '0')}:${String(nowMinutes % 60).padStart(2, '0')}`;
+
   // Click handler directo por slot — recibe el tiempo exacto del slot
   const handleSlotClick = useCallback(
     (prof: ProfessionalInfo, slotTime: string) => {
@@ -1226,6 +1239,7 @@ function ResourceTimelineView({
   return (
     <TooltipProvider delayDuration={200}>
       <div
+        ref={scrollRef}
         className="overflow-auto flex-1"
         style={{ animation: "fadeIn 0.25s ease-out" }}
       >
@@ -1295,10 +1309,18 @@ function ResourceTimelineView({
                   className="absolute top-0 bottom-0 w-0.5 bg-primary z-10"
                   style={{ left: nowPx - 0.5 }}
                 />
-                <div
-                  className="absolute top-0 z-10 h-2.5 w-2.5 rounded-full bg-primary -translate-x-1/2 shadow-sm shadow-primary/30"
-                  style={{ left: nowPx }}
-                />
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div
+                      className="absolute top-0 z-10 h-3 w-3 rounded-full bg-primary -translate-x-1/2 shadow-sm shadow-primary/30 cursor-help"
+                      style={{ left: nowPx }}
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="text-xs">
+                    <p className="font-semibold">{nowTimeLabel} — Hora actual</p>
+                    <p className="text-muted-foreground">Indicador de la hora en tiempo real</p>
+                  </TooltipContent>
+                </Tooltip>
               </>
             )}
           </div>

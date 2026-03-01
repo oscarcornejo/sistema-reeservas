@@ -6,7 +6,7 @@
 
 'use client';
 
-import { useState, useEffect, useCallback, useTransition, useMemo } from 'react';
+import { useState, useEffect, useCallback, useTransition, useMemo, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -55,7 +55,7 @@ import type { IAppointmentPopulated, IScheduleBlockSerialized, AppointmentStatus
 
 // ─── Constantes ──────────────────────────────────────────────────────────────
 
-const WORK_HOURS = Array.from({ length: 13 }, (_, i) => i + 8);
+const WORK_HOURS = Array.from({ length: 16 }, (_, i) => i + 8);
 const HOUR_WIDTH_PX = 150;
 const DAY_START_MINUTES = 480;
 
@@ -321,6 +321,7 @@ export default function ProfessionalCalendarPage() {
                     <Card className="border-border/50 overflow-hidden">
                         <CardContent className="p-3">
                             <CalendarWidget
+                                locale={es}
                                 mode="single"
                                 selected={selectedDate}
                                 month={selectedDate}
@@ -551,6 +552,7 @@ function ProfTimelineView({
 }) {
     const totalWidth = WORK_HOURS.length * HOUR_WIDTH_PX;
     const isTodaySelected = isToday(selectedDate);
+    const scrollRef = useRef<HTMLDivElement>(null);
 
     const [nowMinutes, setNowMinutes] = useState(() => {
         const now = new Date();
@@ -572,9 +574,19 @@ function ProfTimelineView({
         nowMinutes <= DAY_START_MINUTES + WORK_HOURS.length * 60;
     const nowPx = nowInRange ? minutesToPx(nowMinutes) : 0;
 
+    // Auto-scroll para centrar la línea "ahora"
+    useEffect(() => {
+        if (!nowInRange || !scrollRef.current) return;
+        const container = scrollRef.current;
+        const scrollTarget = nowPx - container.clientWidth / 2;
+        container.scrollLeft = Math.max(0, scrollTarget);
+    }, [nowInRange]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const nowTimeLabel = `${String(Math.floor(nowMinutes / 60)).padStart(2, '0')}:${String(nowMinutes % 60).padStart(2, '0')}`;
+
     return (
         <TooltipProvider delayDuration={200}>
-            <div className="overflow-auto flex-1" style={{ animation: 'fadeIn 0.25s ease-out' }}>
+            <div ref={scrollRef} className="overflow-auto flex-1" style={{ animation: 'fadeIn 0.25s ease-out' }}>
                 {/* Header */}
                 <div className="flex sticky top-0 z-20 bg-card border-b border-border/40" style={{ minWidth: totalWidth }}>
                     <div className="relative" style={{ width: totalWidth, height: 40 }}>
@@ -606,7 +618,18 @@ function ProfTimelineView({
                         {nowInRange && (
                             <>
                                 <div className="absolute top-0 bottom-0 w-0.5 bg-primary z-10" style={{ left: nowPx - 0.5 }} />
-                                <div className="absolute top-0 z-10 h-2.5 w-2.5 rounded-full bg-primary -translate-x-1/2 shadow-sm shadow-primary/30" style={{ left: nowPx }} />
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <div
+                                            className="absolute top-0 z-10 h-3 w-3 rounded-full bg-primary -translate-x-1/2 shadow-sm shadow-primary/30 cursor-help"
+                                            style={{ left: nowPx }}
+                                        />
+                                    </TooltipTrigger>
+                                    <TooltipContent side="bottom" className="text-xs">
+                                        <p className="font-semibold">{nowTimeLabel} — Hora actual</p>
+                                        <p className="text-muted-foreground">Indicador de la hora en tiempo real</p>
+                                    </TooltipContent>
+                                </Tooltip>
                             </>
                         )}
                     </div>
