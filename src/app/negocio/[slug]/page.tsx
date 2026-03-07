@@ -2,7 +2,7 @@
  * @fileoverview Perfil público de negocio.
  * Server Component con datos cacheados (PPR), SEO metadata dinámico,
  * y fetching paralelo sin waterfalls.
- * Diseño refinado con gradientes, acentos y animaciones.
+ * Layout: Header → Galería bento → Dos columnas (info + booking card) → CTA → Horarios/Contacto → Footer
  */
 
 import { Suspense } from 'react';
@@ -28,6 +28,8 @@ import {
 import { auth } from '@/lib/auth/auth';
 import PublicNavbar from '@/components/layout/PublicNavbar';
 import { DAYS_OF_WEEK } from '@/lib/utils/format';
+import { getThemeById, getThemeCSSVars } from '@/lib/themes';
+import ThemeInjector from '@/components/ThemeInjector';
 import type { IBusiness, IService, IProfessional, UserRole } from '@/types';
 
 // =============================================================================
@@ -50,20 +52,6 @@ const CATEGORY_EMOJI: Record<string, string> = {
     'Centro de Masajes': '💆',
     'Peluquería': '✂️',
     'Uñas y Manicure': '💅',
-};
-
-/** Gradientes por categoría */
-const CATEGORY_GRADIENT: Record<string, string> = {
-    'Barbería': 'from-amber-500/10 via-orange-500/5 to-transparent',
-    'Spa': 'from-emerald-500/10 via-teal-500/5 to-transparent',
-    'Centro de Estética': 'from-violet-500/10 via-purple-500/5 to-transparent',
-    'Consultorio Dental': 'from-blue-500/10 via-indigo-500/5 to-transparent',
-    'Consultorio Médico': 'from-cyan-500/10 via-blue-500/5 to-transparent',
-    'Salón de Belleza': 'from-pink-500/10 via-rose-500/5 to-transparent',
-    'Clínica de Fisioterapia': 'from-teal-500/10 via-emerald-500/5 to-transparent',
-    'Centro de Masajes': 'from-indigo-500/10 via-violet-500/5 to-transparent',
-    'Peluquería': 'from-rose-500/10 via-pink-500/5 to-transparent',
-    'Uñas y Manicure': 'from-fuchsia-500/10 via-pink-500/5 to-transparent',
 };
 
 // =============================================================================
@@ -127,7 +115,7 @@ async function AuthNavbar() {
 
 export default function NegocioPage({ params }: Props) {
     return (
-        <div className="min-h-screen bg-background">
+        <div className="negocio-page min-h-screen flex flex-col bg-[#F8FAFC]">
             <Suspense fallback={<NavbarSkeleton />}>
                 <AuthNavbar />
             </Suspense>
@@ -159,8 +147,8 @@ function NavbarSkeleton() {
     );
 }
 
-/** Contenido dinámico que depende de params y datos cacheados */
-async function NegocioContent({ params }: { params: Promise<{ slug: string }> }) {
+/** Contenido dinámico que depende de datos cacheados */
+async function NegocioContent({ params }: Props) {
     const { slug } = await params;
 
     // Fetching paralelo — sin waterfalls (async-parallel)
@@ -172,66 +160,110 @@ async function NegocioContent({ params }: { params: Promise<{ slug: string }> })
 
     if (!business) notFound();
 
+    const theme = getThemeById(business.theme);
+    const themeVars = getThemeCSSVars(theme);
+
+    // Objeto plano para el client component ThemeInjector
+    const themeVarsPlain: Record<string, string> = {
+        '--primary': theme.colors.primary,
+        '--primary-foreground': theme.colors.primaryForeground,
+        '--background': theme.colors.background,
+        '--foreground': theme.colors.foreground,
+        '--card': theme.colors.card,
+        '--card-foreground': theme.colors.foreground,
+        '--muted': theme.colors.muted,
+        '--muted-foreground': theme.colors.mutedForeground,
+        '--accent': theme.colors.accent,
+        '--accent-foreground': theme.colors.primaryForeground,
+        '--border': theme.colors.border,
+        '--input': theme.colors.border,
+        '--ring': theme.colors.ring,
+        '--secondary': theme.colors.muted,
+        '--secondary-foreground': theme.colors.foreground,
+        '--popover': theme.colors.card,
+        '--popover-foreground': theme.colors.foreground,
+    };
+
     const categoryEmoji = CATEGORY_EMOJI[business.category] || '🏢';
-    const categoryGradient = CATEGORY_GRADIENT[business.category] || 'from-primary/10 via-primary/5 to-transparent';
     const businessId = String(business._id);
+    const galleryImages = business.gallery ?? [];
 
     return (
-        <main>
-            {/* Secciones interactivas con booking — client component */}
-            <BookingWrapper
-                businessId={businessId}
-                business={business}
-                services={services}
-                professionals={professionals}
-                currency={business.currency}
-                categoryEmoji={categoryEmoji}
-                categoryGradient={categoryGradient}
-            />
+        <div style={themeVars} className="flex-1">
+            {/* Aplica CSS vars al wrapper .negocio-page tras hidratación */}
+            <ThemeInjector vars={themeVarsPlain} />
 
-            {/* Secciones estáticas — server components */}
-            <InfoSection business={business} />
-        </main>
+            <main>
+                {/* Secciones interactivas con booking — client component */}
+                <BookingWrapper
+                    businessId={businessId}
+                    business={business}
+                    services={services}
+                    professionals={professionals}
+                    currency={business.currency}
+                    categoryEmoji={categoryEmoji}
+                    galleryImages={galleryImages}
+                />
+
+                {/* Secciones estáticas — server components */}
+                <InfoSection business={business} />
+            </main>
+        </div>
     );
 }
 
-/** Skeleton de carga mientras se resuelven los datos */
+/** Skeleton de carga — refleja layout estilo Airbnb */
 function PageSkeleton() {
     return (
         <main className="animate-pulse">
-            {/* Hero skeleton */}
-            <section className="py-12 lg:py-20">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div className="h-4 w-32 bg-muted rounded-lg mb-8" />
-                    <div className="flex flex-col lg:flex-row gap-8">
-                        <div className="flex-1 space-y-4">
-                            <div className="h-7 w-28 bg-muted rounded-full" />
-                            <div className="h-12 w-80 bg-muted rounded-lg" />
-                            <div className="h-4 w-52 bg-muted rounded-lg" />
-                            <div className="h-20 w-full max-w-lg bg-muted rounded-lg" />
-                            <div className="flex gap-3">
-                                <div className="h-12 w-52 bg-muted rounded-lg" />
-                                <div className="h-12 w-32 bg-muted rounded-lg" />
-                            </div>
-                        </div>
-                        <div className="space-y-3 lg:w-[280px]">
-                            <div className="h-56 bg-muted rounded-2xl" />
-                        </div>
-                    </div>
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                {/* Header skeleton */}
+                <div className="pt-6 pb-5">
+                    <div className="h-4 w-28 bg-muted rounded mb-4" />
+                    <div className="h-8 w-72 bg-muted rounded-lg mb-2" />
+                    <div className="h-4 w-96 bg-muted rounded" />
                 </div>
-            </section>
-            {/* Services skeleton */}
-            <section className="py-16 bg-muted/20">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div className="h-8 w-56 bg-muted rounded-lg mb-3" />
-                    <div className="h-4 w-72 bg-muted rounded-lg mb-10" />
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+
+                {/* Bento gallery skeleton */}
+                <div className="hidden sm:grid grid-cols-[2fr_1fr_1fr] grid-rows-2 gap-1 rounded-xl overflow-hidden h-[360px] lg:h-[420px] mb-8">
+                    <div className="row-span-2 bg-muted" />
+                    <div className="bg-muted" />
+                    <div className="bg-muted" />
+                    <div className="bg-muted" />
+                    <div className="bg-muted" />
+                </div>
+                <div className="sm:hidden aspect-[4/3] bg-muted rounded-xl mb-8" />
+
+                {/* Two-column skeleton */}
+                <div className="lg:grid lg:grid-cols-[1fr_380px] lg:gap-14 pb-12">
+                    {/* Left */}
+                    <div className="space-y-6">
                         {[1, 2, 3].map((i) => (
-                            <div key={i} className="h-40 bg-muted rounded-2xl" />
+                            <div key={i} className="flex gap-4">
+                                <div className="h-10 w-10 bg-muted rounded-lg shrink-0" />
+                                <div className="flex-1 space-y-2">
+                                    <div className="h-4 w-40 bg-muted rounded" />
+                                    <div className="h-3 w-64 bg-muted rounded" />
+                                </div>
+                            </div>
                         ))}
+                        <div className="h-px bg-border/50 w-full" />
+                        <div className="h-5 w-48 bg-muted rounded mb-3" />
+                        <div className="h-16 w-full bg-muted rounded-lg" />
+                        <div className="h-px bg-border/50 w-full" />
+                        <div className="h-5 w-40 bg-muted rounded mb-3" />
+                        <div className="grid gap-3 sm:grid-cols-2">
+                            {[1, 2, 3, 4].map((i) => (
+                                <div key={i} className="h-24 bg-muted rounded-xl" />
+                            ))}
+                        </div>
+                    </div>
+                    {/* Right */}
+                    <div className="hidden lg:block">
+                        <div className="h-80 bg-muted rounded-xl" />
                     </div>
                 </div>
-            </section>
+            </div>
         </main>
     );
 }
@@ -250,10 +282,8 @@ function InfoSection({ business }: { business: IBusiness }) {
     return (
         <section
             id="info"
-            className="relative py-16 lg:py-20 overflow-hidden"
+            className="border-t border-border/50 py-12 lg:py-16"
         >
-            <div className="absolute inset-0 -z-10 bg-muted/20" />
-            <div className="absolute -top-12 left-1/3 h-48 w-48 rounded-full bg-primary/5 blur-3xl" />
 
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="grid gap-8 lg:gap-10 lg:grid-cols-2">

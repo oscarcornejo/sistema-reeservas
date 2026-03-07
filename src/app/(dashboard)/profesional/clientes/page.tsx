@@ -1,34 +1,32 @@
 /**
- * @fileoverview Pagina de gestion de clientes del admin.
- * Server Component que carga los clientes del negocio desde la BD
- * y delega la tabla interactiva al componente cliente.
+ * @fileoverview Página de clientes del profesional.
+ * Server Component que carga los clientes atendidos por el profesional
+ * autenticado y delega la tabla interactiva al componente cliente.
  */
 
 import { Suspense } from 'react';
-import { getUserBusiness } from '@/lib/auth/dal';
-import { getCachedBusinessClients } from '@/lib/data/queries';
+import { getUserProfessionalProfile } from '@/lib/auth/dal';
+import { getCachedProfessionalClients } from '@/lib/data/queries';
 import { redirect } from 'next/navigation';
-import { AdminClientsTable } from './clients-table';
+import { ClientsTable } from './clients-table';
 import { Card, CardContent } from '@/components/ui/card';
 
 async function ClientsContent() {
-    const business = await getUserBusiness();
-    if (!business) redirect('/admin');
+    const professional = await getUserProfessionalProfile();
+    if (!professional) redirect('/profesional');
 
-    const clients = await getCachedBusinessClients(String(business._id));
+    const todayISO = new Date().toISOString();
+    const data = await getCachedProfessionalClients(
+        String(professional._id),
+        todayISO,
+    );
 
-    const mapped = clients.map((c: Record<string, unknown>) => ({
-        _id: String(c._id ?? c.id),
-        name: String(c.name ?? ''),
-        email: String(c.email ?? ''),
-        phone: String(c.phone ?? ''),
-        tags: Array.isArray(c.tags) ? c.tags as string[] : [],
-        totalVisits: Number(c.totalVisits ?? 0),
-        lastVisit: c.lastVisit ? String(c.lastVisit) : null,
-        source: String(c.source ?? 'online'),
-    }));
-
-    return <AdminClientsTable clients={mapped} />;
+    return (
+        <ClientsTable
+            clients={data.clients}
+            metrics={data.metrics}
+        />
+    );
 }
 
 function ClientsSkeleton() {
@@ -74,7 +72,7 @@ function ClientsSkeleton() {
     );
 }
 
-export default function AdminClientsPage() {
+export default function ProfessionalClientsPage() {
     return (
         <Suspense fallback={<ClientsSkeleton />}>
             <ClientsContent />

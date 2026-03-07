@@ -1,35 +1,25 @@
 /**
- * @fileoverview Singleton de transporter Nodemailer.
+ * @fileoverview Singleton de Resend para envío de emails.
  * Reutiliza la instancia en desarrollo (hot-reload) y en producción.
  */
 
-import nodemailer from 'nodemailer';
-import type { Transporter } from 'nodemailer';
+import { Resend } from 'resend';
 
 declare global {
     // eslint-disable-next-line no-var
-    var emailTransporter: Transporter | undefined;
+    var resendClient: Resend | undefined;
 }
 
 /**
- * Obtener (o crear) el transporter de Nodemailer.
- * Cachea la instancia en `globalThis` para evitar recrearlo en hot-reload.
+ * Obtener (o crear) la instancia de Resend.
+ * Cachea en `globalThis` para evitar recrearla en hot-reload.
  */
-export function getTransporter(): Transporter {
-    if (globalThis.emailTransporter) {
-        return globalThis.emailTransporter;
+export function getResend(): Resend {
+    if (globalThis.resendClient) {
+        return globalThis.resendClient;
     }
 
-    const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: Number(process.env.SMTP_PORT) || 587,
-        secure: Number(process.env.SMTP_PORT) === 465,
-        auth: {
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASSWORD,
-        },
-    });
-
-    globalThis.emailTransporter = transporter;
-    return transporter;
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    globalThis.resendClient = resend;
+    return resend;
 }

@@ -69,17 +69,15 @@ export async function sendAppointmentReminder(
 
         await sendEmail({ to: client.email, subject, html });
 
-        // 2. Notificación in-app al profesional (solo plan enterprise)
-        if (business.subscriptionPlan === 'enterprise') {
-            await Notification.create({
-                recipientId: professional.userId,
-                type: 'booking-reminder',
-                title: 'Recordatorio de cita',
-                message: `Mañana: ${client.name} — ${service.name} a las ${formattedTime}`,
-                referenceId: appointment._id.toString(),
-                referenceModel: 'Appointment',
-            });
-        }
+        // 2. Notificación in-app al profesional
+        await Notification.create({
+            recipientId: professional.userId,
+            type: 'booking-reminder',
+            title: 'Recordatorio de cita',
+            message: `Mañana: ${client.name} — ${service.name} a las ${formattedTime}`,
+            referenceId: appointment._id.toString(),
+            referenceModel: 'Appointment',
+        });
 
         // 3. Registrar en appointment.remindersSent
         await Appointment.updateOne(

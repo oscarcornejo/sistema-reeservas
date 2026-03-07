@@ -365,13 +365,13 @@ export default function ServicesPage() {
             </div>
 
             {/* ── Tabs: Servicios / Categorías ── */}
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-                <TabsList>
-                    <TabsTrigger value="servicios" className="gap-2">
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList variant="line">
+                    <TabsTrigger value="servicios" className="gap-2 after:bg-emerald-500 dark:after:bg-emerald-400">
                         <Scissors className="h-4 w-4" />
                         Servicios
                     </TabsTrigger>
-                    <TabsTrigger value="categorias" className="gap-2">
+                    <TabsTrigger value="categorias" className="gap-2 after:bg-amber-500 dark:after:bg-amber-400">
                         <FolderOpen className="h-4 w-4" />
                         Categorías
                     </TabsTrigger>
@@ -431,7 +431,7 @@ export default function ServicesPage() {
                         className="relative overflow-hidden border-border/50"
                         style={{ animation: 'fadeIn 0.4s ease-out 0.1s both' }}
                     >
-                        <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-emerald-500 to-accent/40" />
+                        <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-emerald-500 to-emerald-400/40 dark:from-emerald-400 dark:to-emerald-500/40" />
                         <CardContent className="p-0">
                             {isPending && services.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-16 gap-3">
@@ -528,7 +528,7 @@ export default function ServicesPage() {
                         className="relative overflow-hidden border-border/50"
                         style={{ animation: 'fadeIn 0.4s ease-out 0.1s both' }}
                     >
-                        <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-emerald-500 to-accent/40" />
+                        <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-amber-500 to-amber-400/40 dark:from-amber-400 dark:to-amber-500/40" />
                         <CardContent className="p-0">
                             {isPending && categories.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-16 gap-3">

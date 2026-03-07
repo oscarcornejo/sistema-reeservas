@@ -129,7 +129,7 @@ export default function MisCitasPage() {
 
             {/* Tabs */}
             <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabFilter)}>
-                <TabsList>
+                <TabsList variant="line">
                     <TabsTrigger value="upcoming">Próximas</TabsTrigger>
                     <TabsTrigger value="past">Pasadas</TabsTrigger>
                 </TabsList>

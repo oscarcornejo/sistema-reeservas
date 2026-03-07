@@ -141,6 +141,7 @@ export default function HomePage() {
             <HowItWorksSection />
             <CategoriesSection />
             <BenefitsSection />
+            <BookingCtaSection />
             <CtaSection />
             <PublicFooter />
         </div>
@@ -394,7 +395,38 @@ function BenefitsSection() {
 }
 
 // =============================================================================
-// CTA final
+// CTA — Reserva tu cita
+// =============================================================================
+
+function BookingCtaSection() {
+    return (
+        <section className="border-t border-border/50 py-12 lg:py-16">
+            <div className="mx-auto max-w-2xl px-4 text-center">
+                <h2 className="text-xl sm:text-2xl font-semibold tracking-tight mb-2">
+                    ¿Listo para tu próxima cita?
+                </h2>
+                <p className="text-sm text-muted-foreground mb-6">
+                    Encuentra el profesional ideal y reserva en segundos, sin llamadas ni esperas.
+                </p>
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                    <Button
+                        size="lg"
+                        className="h-11 px-8 font-semibold bg-primary text-primary-foreground hover:bg-primary/90"
+                        asChild
+                    >
+                        <Link href="/buscar">
+                            <Search className="mr-2 h-4 w-4" />
+                            Explorar negocios
+                        </Link>
+                    </Button>
+                </div>
+            </div>
+        </section>
+    );
+}
+
+// =============================================================================
+// CTA — Registro de negocios
 // =============================================================================
 
 function CtaSection() {

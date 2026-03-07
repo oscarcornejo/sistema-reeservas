@@ -2,6 +2,18 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+    ],
+  },
   async headers() {
     return [
       {
@@ -13,7 +25,7 @@ const nextConfig: NextConfig = {
               "default-src 'self'",
               "script-src 'self' 'unsafe-inline' 'unsafe-eval' cdn.jsdelivr.net sdk.mercadopago.com",
               "style-src 'self' 'unsafe-inline' cdn.jsdelivr.net",
-              "img-src 'self' blob: data: *.cloudinary.com tile.openstreetmap.org",
+              "img-src 'self' blob: data: *.cloudinary.com images.unsplash.com tile.openstreetmap.org",
               "font-src 'self'",
               "connect-src 'self' api.mercadopago.com",
               "frame-src 'self' sdk.mercadopago.com",

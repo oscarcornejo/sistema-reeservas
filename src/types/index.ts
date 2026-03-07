@@ -48,6 +48,9 @@ export type NotificationType = 'new-booking' | 'booking-cancelled' | 'booking-re
 /** Tipo de bloqueo de agenda */
 export type ScheduleBlockType = 'day' | 'week' | 'month' | 'full';
 
+/** Tema visual del negocio (página pública) */
+export type BusinessThemeId = 'salud' | 'barberia' | 'estetica' | 'naturaleza' | 'hospedaje' | 'fitness';
+
 /** Origen del cliente */
 export type ClientSource = 'online' | 'walk-in' | 'referral' | 'marketplace';
 
@@ -137,6 +140,7 @@ export interface IBusiness {
   description?: string;
   logo?: string;
   coverImage?: string;
+  gallery?: string[];
   category: string;
   address: string;
   city: string;
@@ -157,6 +161,7 @@ export interface IBusiness {
   requirePaymentUpfront: boolean;
   cancellationPolicy?: string;
   isPublished: boolean;
+  theme?: BusinessThemeId;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -13,6 +13,7 @@ import {
   useMemo,
   useRef,
 } from "react";
+import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -71,13 +72,13 @@ import {
 import {
   getBusinessAppointments,
   getBusinessProfessionals,
+  getAppointmentById,
 } from "@/actions/appointments";
 import { getScheduleBlocks } from "@/actions/schedule-blocks";
 import { getBusinessSettings } from "@/actions/business";
 import { getBusinessServices } from "@/actions/services";
 import { createPublicBooking } from "@/actions/public-booking";
 import { AppointmentDetailDialog } from "@/components/booking/AppointmentDetailDialog";
-import { RescheduleDialog } from "@/components/booking/RescheduleDialog";
 import { CancelDialog } from "@/components/booking/CancelDialog";
 import { ScheduleBlockDialog } from "@/components/booking/ScheduleBlockDialog";
 import { UnblockDialog } from "@/components/booking/UnblockDialog";
@@ -259,6 +260,7 @@ function isDateBlocked(
 // ─── Componente principal ────────────────────────────────────────────────────
 
 export default function CalendarPage() {
+  const searchParams = useSearchParams();
   // Estado core
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [appointments, setAppointments] = useState<IAppointment[]>([]);
@@ -285,7 +287,6 @@ export default function CalendarPage() {
   const [selectedAppointment, setSelectedAppointment] =
     useState<IAppointmentPopulated | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
-  const [rescheduleOpen, setRescheduleOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
 
   // Schedule blocks
@@ -359,6 +360,25 @@ export default function CalendarPage() {
   useEffect(() => {
     loadAppointments();
   }, [loadAppointments]);
+
+  // Abrir cita desde query param ?cita=<id>
+  useEffect(() => {
+    const citaId = searchParams.get("cita");
+    if (!citaId) return;
+
+    const found = appointments.find((a) => a._id === citaId);
+    if (found) {
+      setSelectedAppointment(found as IAppointmentPopulated);
+      setDetailOpen(true);
+    } else if (appointments.length > 0) {
+      getAppointmentById(citaId).then((result) => {
+        if (result.success && result.data) {
+          setSelectedAppointment(result.data);
+          setDetailOpen(true);
+        }
+      });
+    }
+  }, [searchParams, appointments]);
 
   // ─── Datos derivados ─────────────────────────────────────────────────────
 
@@ -448,12 +468,6 @@ export default function CalendarPage() {
     [],
   );
 
-  const handleReschedule = useCallback((apt: IAppointmentPopulated) => {
-    setDetailOpen(false);
-    setSelectedAppointment(apt);
-    setRescheduleOpen(true);
-  }, []);
-
   const handleCancel = useCallback((apt: IAppointmentPopulated) => {
     setDetailOpen(false);
     setSelectedAppointment(apt);
@@ -462,7 +476,6 @@ export default function CalendarPage() {
 
   const handleActionSuccess = useCallback(() => {
     setDetailOpen(false);
-    setRescheduleOpen(false);
     setCancelOpen(false);
     setSelectedAppointment(null);
     loadAppointments();
@@ -906,14 +919,8 @@ export default function CalendarPage() {
         onOpenChange={setDetailOpen}
         appointment={selectedAppointment}
         userRole="admin"
-        onReschedule={handleReschedule}
         onCancel={handleCancel}
-      />
-      <RescheduleDialog
-        open={rescheduleOpen}
-        onOpenChange={setRescheduleOpen}
-        appointment={selectedAppointment}
-        onSuccess={handleActionSuccess}
+        onStatusChange={loadAppointments}
       />
       <CancelDialog
         open={cancelOpen}

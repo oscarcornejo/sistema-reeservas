@@ -52,6 +52,11 @@ npm run seed       # Seed MongoDB with test data
 4. DAL helpers (`src/lib/auth/dal.ts`) provide `requireAuth()`, `requireRole()`, `requireAdmin()`, `getUserBusiness()`, etc. for Server Actions
 5. API route at `src/app/api/auth/[...nextauth]/route.ts` exports `{ GET, POST }` handlers
 
+### API Routes
+- `src/app/api/auth/[...nextauth]/route.ts` — Auth.js handlers
+- `src/app/api/webhooks/mercadopago/route.ts` — MercadoPago payment webhook
+- `src/app/api/cron/send-reminders/route.ts` — Cron job for appointment reminder notifications
+
 ### Server Actions Pattern (`src/actions/`)
 All server actions follow this pattern:
 1. Verify auth/role via DAL helpers
@@ -97,6 +102,8 @@ Action files: `auth.ts`, `appointments.ts`, `services.ts`, `service-categories.t
 - shadcn/ui components in `src/components/ui/` — add new ones via `npx shadcn@latest add <component>` (style: `new-york`, icon library: `lucide`)
 - Custom layout components in `src/components/layout/` (`Sidebar`, `TopNavbar`, `PublicNavbar`, `ThemeToggle`, `NotificationBell`)
 - Booking components in `src/components/booking/` (`BookingDialog`, `BookingWrapper`, `AppointmentDetailDialog`, `RescheduleDialog`, `CancelDialog`, `ScheduleBlockDialog`, `UnblockDialog`)
+- Business theme system: `src/lib/themes.ts` defines per-business color themes, `src/components/ThemeInjector.tsx` applies them as CSS custom properties on public `/negocio/[slug]` pages
+- Gallery components in `src/components/gallery/` for business image galleries
 
 ### Error Boundaries
 - `src/app/global-error.tsx` — root error boundary (includes `<html>`/`<body>`)
@@ -131,6 +138,10 @@ Optional (features degrade gracefully):
 - `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `EMAIL_FROM` — email
 
 A `.env.local` with dev credentials exists in the repo.
+
+## Security Headers
+
+`next.config.ts` defines a strict Content-Security-Policy and other security headers. When adding new external resources (scripts, images, fonts, API endpoints), update the CSP directives in `next.config.ts` — otherwise they'll be blocked by the browser. Current allowed origins include `cdn.jsdelivr.net`, `sdk.mercadopago.com`, `*.cloudinary.com`, `images.unsplash.com`, `tile.openstreetmap.org`, `api.mercadopago.com`.
 
 ## Seed Data
 

@@ -128,6 +128,7 @@ export async function createPublicBooking(
                     name: parsed.data.clientName,
                     phone: parsed.data.clientPhone,
                     source: 'online',
+                    tags: ['Nuevo'],
                 },
             },
             { upsert: true, new: true }

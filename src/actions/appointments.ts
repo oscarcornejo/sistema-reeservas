@@ -12,7 +12,7 @@ import { createAppointmentSchema, rescheduleAppointmentSchema, cancelAppointment
 import { addMinutes, format, parseISO, startOfDay, endOfDay } from 'date-fns';
 import { updateTag } from 'next/cache';
 import { serialize } from '@/lib/utils';
-import { sendRescheduleNotifications, sendCancellationNotifications } from '@/lib/notifications/booking-notifications';
+import { sendRescheduleNotifications, sendCancellationNotifications, sendStatusChangeNotifications } from '@/lib/notifications/booking-notifications';
 import type { ActionResult, IAppointment, IAppointmentPopulated, AppointmentStatus } from '@/types';
 
 /**
@@ -131,19 +131,25 @@ export async function updateAppointmentStatus(
     try {
         await connectDB();
 
-        // Obtener la cita para verificar ownership
-        const appointment = await Appointment.findById(appointmentId);
+        // Obtener la cita con populate para verificar ownership y enviar notificaciones
+        const appointment = await Appointment.findById(appointmentId)
+            .populate('professionalId', 'displayName userId')
+            .populate('clientId', 'name email userId')
+            .populate('serviceId', 'name');
         if (!appointment) {
             return { success: false, error: 'Cita no encontrada' };
         }
 
         // Verificar autorización según rol
-        const userId = user.id;
+        const prof = appointment.professionalId as unknown as { _id: string; displayName: string; userId?: string } | null;
+        const client = appointment.clientId as unknown as { _id: string; name: string; email: string; userId?: string } | null;
+        const service = appointment.serviceId as unknown as { _id: string; name: string } | null;
+
         const isAdmin = user.role === 'admin';
         const isProfessional = user.role === 'professional'
-            && appointment.professionalId?.toString() === userId;
+            && prof?.userId?.toString() === user.id;
         const isClient = user.role === 'client'
-            && appointment.clientId?.toString() === userId;
+            && client?.userId?.toString() === user.id;
 
         if (!isAdmin && !isProfessional && !isClient) {
             return { success: false, error: 'No tienes permiso para modificar esta cita' };
@@ -160,6 +166,49 @@ export async function updateAppointmentStatus(
         }
 
         await Appointment.findByIdAndUpdate(appointmentId, updateData, { new: true });
+
+        updateTag('dashboard-metrics');
+        updateTag('clients');
+        updateTag('professional-clients');
+        updateTag('professional-reports');
+
+        // Enviar notificaciones según el nuevo estado
+        if (client && prof && service) {
+            if (status === 'cancelled') {
+                sendCancellationNotifications({
+                    appointmentId: appointment._id.toString(),
+                    businessId: appointment.businessId.toString(),
+                    serviceName: service.name,
+                    professionalName: prof.displayName,
+                    clientName: client.name,
+                    clientEmail: client.email,
+                    date: appointment.date,
+                    startTime: appointment.startTime,
+                    cancellationReason: cancellationReason || 'Cancelada por cambio de estado',
+                    actorId: user.id!,
+                    actorRole: user.role!,
+                    professionalUserId: prof.userId?.toString(),
+                    clientUserId: client.userId?.toString(),
+                });
+            } else {
+                // Para confirmación, en progreso, completada, no-show:
+                // notificar al profesional y admin (excluyendo al actor)
+                sendStatusChangeNotifications({
+                    appointmentId: appointment._id.toString(),
+                    businessId: appointment.businessId.toString(),
+                    serviceName: service.name,
+                    professionalName: prof.displayName,
+                    clientName: client.name,
+                    clientEmail: client.email,
+                    date: appointment.date,
+                    startTime: appointment.startTime,
+                    newStatus: status,
+                    actorId: user.id!,
+                    professionalUserId: prof.userId?.toString(),
+                    clientUserId: client.userId?.toString(),
+                });
+            }
+        }
 
         return { success: true };
     } catch (error) {
@@ -367,6 +416,50 @@ export async function cancelAppointment(
 }
 
 /**
+ * Obtener una cita por su ID (populada).
+ * Verifica que el usuario tenga acceso (admin del negocio o profesional asignado).
+ */
+export async function getAppointmentById(
+    appointmentId: string
+): Promise<ActionResult<IAppointmentPopulated>> {
+    const user = await requireAuth();
+
+    try {
+        await connectDB();
+
+        const appointment = await Appointment.findById(appointmentId)
+            .populate('serviceId', 'name duration price')
+            .populate('professionalId', 'displayName avatar')
+            .populate('clientId', 'name email phone')
+            .lean();
+
+        if (!appointment) {
+            return { success: false, error: 'Cita no encontrada' };
+        }
+
+        // Verificar acceso
+        if (user.role === 'admin') {
+            const business = await getUserBusiness();
+            if (!business || appointment.businessId.toString() !== business._id.toString()) {
+                return { success: false, error: 'No tienes acceso a esta cita' };
+            }
+        } else if (user.role === 'professional') {
+            const professional = await Professional.findOne({ userId: user.id });
+            if (!professional || appointment.professionalId._id.toString() !== professional._id.toString()) {
+                return { success: false, error: 'No tienes acceso a esta cita' };
+            }
+        } else {
+            return { success: false, error: 'Acceso no autorizado' };
+        }
+
+        return { success: true, data: serialize(appointment) as unknown as IAppointmentPopulated };
+    } catch (error) {
+        console.error('Error obteniendo cita por ID:', error);
+        return { success: false, error: 'Error al obtener la cita' };
+    }
+}
+
+/**
  * Obtener citas del profesional autenticado por rango de fechas.
  */
 export async function getProfessionalAppointments(
@@ -568,6 +661,11 @@ export async function getAvailableSlots(
         const availableSlots: string[] = [];
         const slotInterval = 30; // minutos
 
+        // Si la fecha es hoy, calcular minutos actuales para filtrar slots pasados
+        const now = new Date();
+        const isTargetToday = targetDate.toDateString() === now.toDateString();
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
         for (const schedule of daySchedule.slots) {
             const [startH, startM] = schedule.start.split(':').map(Number);
             const [endH, endM] = schedule.end.split(':').map(Number);
@@ -579,6 +677,11 @@ export async function getAvailableSlots(
                 time + service.duration <= scheduleEnd;
                 time += slotInterval
             ) {
+                // Omitir slots que ya pasaron si es hoy
+                if (isTargetToday && time <= currentMinutes) {
+                    continue;
+                }
+
                 const slotStart = `${String(Math.floor(time / 60)).padStart(2, '0')}:${String(time % 60).padStart(2, '0')}`;
                 const slotEndMinutes = time + service.duration;
                 const slotEnd = `${String(Math.floor(slotEndMinutes / 60)).padStart(2, '0')}:${String(slotEndMinutes % 60).padStart(2, '0')}`;

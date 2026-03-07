@@ -28,7 +28,8 @@ import {
     CalendarDays,
     Loader2,
 } from 'lucide-react';
-import { getProfessionalAppointments } from '@/actions/appointments';
+import { useSearchParams } from 'next/navigation';
+import { getProfessionalAppointments, getAppointmentById } from '@/actions/appointments';
 import { getProfessionalBlocks, getMyProfessionalId } from '@/actions/schedule-blocks';
 import {
     formatRelativeDate,
@@ -37,17 +38,20 @@ import {
 import {
     format,
     addDays,
+    addMonths,
+    addWeeks,
     startOfWeek,
     endOfWeek,
+    startOfMonth,
+    endOfMonth,
     isToday,
-    eachDayOfInterval,
     isSameDay,
-    addWeeks,
+    isSameMonth,
+    eachDayOfInterval,
 } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { AppointmentDetailDialog } from '@/components/booking/AppointmentDetailDialog';
-import { RescheduleDialog } from '@/components/booking/RescheduleDialog';
 import { CancelDialog } from '@/components/booking/CancelDialog';
 import { ScheduleBlockDialog } from '@/components/booking/ScheduleBlockDialog';
 import { UnblockDialog } from '@/components/booking/UnblockDialog';
@@ -67,7 +71,7 @@ for (const hour of WORK_HOURS) {
 
 const SLOT_WIDTH_PX = HOUR_WIDTH_PX / 2;
 
-type ViewMode = 'today' | 'week';
+type ViewMode = 'today' | 'week' | 'month';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -104,6 +108,7 @@ function isDateBlockedProf(
 // ─── Componente principal ────────────────────────────────────────────────────
 
 export default function ProfessionalCalendarPage() {
+    const searchParams = useSearchParams();
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const [appointments, setAppointments] = useState<IAppointmentPopulated[]>([]);
     const [isPending, startTransition] = useTransition();
@@ -113,7 +118,6 @@ export default function ProfessionalCalendarPage() {
     // Dialog state
     const [selectedAppointment, setSelectedAppointment] = useState<IAppointmentPopulated | null>(null);
     const [detailOpen, setDetailOpen] = useState(false);
-    const [rescheduleOpen, setRescheduleOpen] = useState(false);
     const [cancelOpen, setCancelOpen] = useState(false);
 
     // Schedule blocks
@@ -136,7 +140,12 @@ export default function ProfessionalCalendarPage() {
         let start: string;
         let end: string;
 
-        if (viewMode === 'week') {
+        if (viewMode === 'month') {
+            const mStart = startOfMonth(selectedDate);
+            const mEnd = endOfMonth(selectedDate);
+            start = format(startOfWeek(mStart, { weekStartsOn: 1 }), 'yyyy-MM-dd');
+            end = format(endOfWeek(mEnd, { weekStartsOn: 1 }), 'yyyy-MM-dd');
+        } else if (viewMode === 'week') {
             start = format(startOfWeek(selectedDate, { weekStartsOn: 1 }), 'yyyy-MM-dd');
             end = format(endOfWeek(selectedDate, { weekStartsOn: 1 }), 'yyyy-MM-dd');
         } else {
@@ -165,6 +174,27 @@ export default function ProfessionalCalendarPage() {
         loadAppointments();
     }, [loadAppointments]);
 
+    // Abrir cita desde query param ?cita=<id>
+    useEffect(() => {
+        const citaId = searchParams.get('cita');
+        if (!citaId) return;
+
+        // Buscar en citas ya cargadas o cargar por ID
+        const found = appointments.find((a) => a._id === citaId);
+        if (found) {
+            setSelectedAppointment(found);
+            setDetailOpen(true);
+        } else if (appointments.length > 0) {
+            // Si ya cargaron y no esta, buscar por ID
+            getAppointmentById(citaId).then((result) => {
+                if (result.success && result.data) {
+                    setSelectedAppointment(result.data);
+                    setDetailOpen(true);
+                }
+            });
+        }
+    }, [searchParams, appointments]);
+
     // ─── Datos derivados ─────────────────────────────────────────────────────
 
     const dayAppointments = useMemo(
@@ -181,6 +211,7 @@ export default function ProfessionalCalendarPage() {
     );
 
     const contextAppointments = viewMode === 'today' ? dayAppointments : appointments;
+    const summaryLabel = viewMode === 'month' ? 'Resumen del mes' : viewMode === 'week' ? 'Resumen de la semana' : 'Resumen del dia';
     const confirmedCount = contextAppointments.filter((a) => a.status === 'confirmed').length;
     const pendingCount = contextAppointments.filter((a) => a.status === 'pending').length;
 
@@ -191,12 +222,6 @@ export default function ProfessionalCalendarPage() {
         setDetailOpen(true);
     }, []);
 
-    const handleReschedule = useCallback((apt: IAppointmentPopulated) => {
-        setDetailOpen(false);
-        setSelectedAppointment(apt);
-        setRescheduleOpen(true);
-    }, []);
-
     const handleCancel = useCallback((apt: IAppointmentPopulated) => {
         setDetailOpen(false);
         setSelectedAppointment(apt);
@@ -205,7 +230,6 @@ export default function ProfessionalCalendarPage() {
 
     const handleActionSuccess = useCallback(() => {
         setDetailOpen(false);
-        setRescheduleOpen(false);
         setCancelOpen(false);
         setSelectedAppointment(null);
         loadAppointments();
@@ -231,14 +255,11 @@ export default function ProfessionalCalendarPage() {
                                 Mi Calendario
                             </h1>
                             <p className="text-muted-foreground">
-                                {viewMode === 'today' ? (
-                                    <>
-                                        {formatRelativeDate(selectedDate)} —{' '}
-                                        <span className="capitalize">
-                                            {format(selectedDate, "EEEE dd 'de' MMMM", { locale: es })}
-                                        </span>
-                                    </>
-                                ) : (
+                                {viewMode === 'month' ? (
+                                    <span className="capitalize">
+                                        {format(selectedDate, "MMMM yyyy", { locale: es })}
+                                    </span>
+                                ) : viewMode === 'week' ? (
                                     (() => {
                                         const wStart = startOfWeek(selectedDate, { weekStartsOn: 1 });
                                         const wEnd = endOfWeek(selectedDate, { weekStartsOn: 1 });
@@ -249,6 +270,13 @@ export default function ProfessionalCalendarPage() {
                                             </span>
                                         );
                                     })()
+                                ) : (
+                                    <>
+                                        {formatRelativeDate(selectedDate)} —{' '}
+                                        <span className="capitalize">
+                                            {format(selectedDate, "EEEE dd 'de' MMMM", { locale: es })}
+                                        </span>
+                                    </>
                                 )}
                             </p>
                         </div>
@@ -269,7 +297,7 @@ export default function ProfessionalCalendarPage() {
                                 aria-label="Fecha anterior"
                                 onClick={() =>
                                     setSelectedDate((d) =>
-                                        viewMode === 'week' ? addWeeks(d, -1) : addDays(d, -1),
+                                        viewMode === 'month' ? addMonths(d, -1) : viewMode === 'week' ? addWeeks(d, -1) : addDays(d, -1),
                                     )
                                 }
                             >
@@ -297,7 +325,7 @@ export default function ProfessionalCalendarPage() {
                                 aria-label="Fecha siguiente"
                                 onClick={() =>
                                     setSelectedDate((d) =>
-                                        viewMode === 'week' ? addWeeks(d, 1) : addDays(d, 1),
+                                        viewMode === 'month' ? addMonths(d, 1) : viewMode === 'week' ? addWeeks(d, 1) : addDays(d, 1),
                                     )
                                 }
                             >
@@ -311,6 +339,7 @@ export default function ProfessionalCalendarPage() {
                             <TabsList variant="line">
                                 <TabsTrigger value="today">Hoy</TabsTrigger>
                                 <TabsTrigger value="week">Semana</TabsTrigger>
+                                <TabsTrigger value="month">Mes</TabsTrigger>
                             </TabsList>
                         </Tabs>
                     </div>
@@ -338,7 +367,7 @@ export default function ProfessionalCalendarPage() {
                         <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-accent to-primary/40" />
                         <CardContent className="p-4 space-y-3">
                             <p className="text-sm font-semibold">
-                                {viewMode === 'week' ? 'Resumen de la semana' : 'Resumen del día'}
+                                {summaryLabel}
                             </p>
                             <div className="flex items-center justify-between">
                                 <span className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -372,6 +401,17 @@ export default function ProfessionalCalendarPage() {
                                 <Loader2 className="h-8 w-8 animate-spin text-primary/60" />
                                 <p className="text-sm text-muted-foreground">Cargando citas...</p>
                             </div>
+                        ) : viewMode === 'month' ? (
+                            <ProfMonthView
+                                appointments={appointments}
+                                selectedDate={selectedDate}
+                                scheduleBlocks={scheduleBlocks}
+                                onDayClick={(day) => {
+                                    setViewMode('today');
+                                    setSelectedDate(day);
+                                }}
+                                onAppointmentClick={handleAppointmentClick}
+                            />
                         ) : viewMode === 'week' ? (
                             <ProfWeekView
                                 appointments={appointments}
@@ -383,11 +423,6 @@ export default function ProfessionalCalendarPage() {
                                 }}
                                 onAppointmentClick={handleAppointmentClick}
                             />
-                        ) : dayAppointments.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-16 gap-3">
-                                <CalendarDays className="h-12 w-12 text-muted-foreground/20" />
-                                <p className="text-muted-foreground text-sm">Sin citas para este día</p>
-                            </div>
                         ) : (
                             <ProfTimelineView
                                 dayAppointments={dayAppointments}
@@ -410,14 +445,8 @@ export default function ProfessionalCalendarPage() {
                 onOpenChange={setDetailOpen}
                 appointment={selectedAppointment}
                 userRole="professional"
-                onReschedule={handleReschedule}
                 onCancel={handleCancel}
-            />
-            <RescheduleDialog
-                open={rescheduleOpen}
-                onOpenChange={setRescheduleOpen}
-                appointment={selectedAppointment}
-                onSuccess={handleActionSuccess}
+                onStatusChange={loadAppointments}
             />
             <CancelDialog
                 open={cancelOpen}
@@ -769,5 +798,103 @@ function ProfTimelineView({
                 </div>
             </div>
         </TooltipProvider>
+    );
+}
+
+// ─── Vista mensual profesional ──────────────────────────────────────────────
+
+function ProfMonthView({
+    appointments,
+    selectedDate,
+    scheduleBlocks,
+    onDayClick,
+    onAppointmentClick,
+}: {
+    appointments: IAppointmentPopulated[];
+    selectedDate: Date;
+    scheduleBlocks: IScheduleBlockSerialized[];
+    onDayClick: (day: Date) => void;
+    onAppointmentClick: (apt: IAppointmentPopulated) => void;
+}) {
+    const monthStart = startOfMonth(selectedDate);
+    const monthEnd = endOfMonth(selectedDate);
+    const calStart = startOfWeek(monthStart, { weekStartsOn: 1 });
+    const calEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
+    const days = eachDayOfInterval({ start: calStart, end: calEnd });
+
+    const DAY_LABELS = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+
+    return (
+        <div className="p-2 sm:p-4" style={{ animation: 'fadeIn 0.25s ease-out' }}>
+            <div className="grid grid-cols-7 gap-px bg-border/20 rounded-lg overflow-hidden border border-border/40">
+                {DAY_LABELS.map((d, i) => (
+                    <div
+                        key={i}
+                        className="bg-card text-center py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border/40"
+                    >
+                        {d}
+                    </div>
+                ))}
+                {days.map((day) => {
+                    const dayApts = appointments.filter((apt) =>
+                        isSameDay(new Date(apt.date), day),
+                    );
+                    const inMonth = isSameMonth(day, selectedDate);
+                    const todayFlag = isToday(day);
+                    const hasBlocked = isDateBlockedProf(day, scheduleBlocks) !== null;
+
+                    return (
+                        <div
+                            key={day.toISOString()}
+                            role="button"
+                            tabIndex={0}
+                            className={`bg-card min-h-[100px] p-1.5 cursor-pointer hover:bg-muted/40 transition-colors ${!inMonth ? 'opacity-40' : ''} ${hasBlocked && inMonth ? 'bg-red-500/[0.03]' : ''}`}
+                            onClick={() => onDayClick(day)}
+                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onDayClick(day); } }}
+                        >
+                            <div className="flex items-center gap-1">
+                                <span
+                                    className={`inline-flex items-center justify-center text-sm font-medium h-6 min-w-6 ${todayFlag ? 'bg-primary text-primary-foreground rounded-full px-1.5' : ''}`}
+                                >
+                                    {format(day, 'd')}
+                                </span>
+                                {hasBlocked && inMonth && <Ban className="h-3 w-3 text-red-500/60" />}
+                            </div>
+                            {dayApts.length > 0 && (
+                                <div className="mt-1 space-y-0.5">
+                                    {dayApts.slice(0, 3).map((apt) => {
+                                        const statusCfg = APPOINTMENT_STATUS_CONFIG[apt.status as AppointmentStatus];
+                                        const clientName = apt.clientId?.name || 'Cliente';
+                                        return (
+                                            <div
+                                                key={apt._id}
+                                                role="button"
+                                                tabIndex={0}
+                                                className="flex items-center gap-1 text-[10px] leading-tight cursor-pointer hover:opacity-80 transition-opacity"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    onAppointmentClick(apt);
+                                                }}
+                                                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); onAppointmentClick(apt); } }}
+                                            >
+                                                <div className={`h-1.5 w-1.5 rounded-full shrink-0 ${statusCfg?.dot || 'bg-gray-400'}`} />
+                                                <span className="truncate text-muted-foreground">
+                                                    {apt.startTime} {clientName}
+                                                </span>
+                                            </div>
+                                        );
+                                    })}
+                                    {dayApts.length > 3 && (
+                                        <span className="text-[10px] text-muted-foreground/70 pl-3">
+                                            +{dayApts.length - 3} mas
+                                        </span>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
     );
 }

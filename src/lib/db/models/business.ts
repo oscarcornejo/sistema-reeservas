@@ -7,12 +7,14 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 import type {
     IBusiness,
+    BusinessThemeId,
     SupportedCountry,
     SupportedCurrency,
     SubscriptionStatus,
     SubscriptionPlan,
     DayOfWeek,
 } from '@/types';
+import { BUSINESS_THEME_IDS } from '@/lib/themes';
 
 export interface IBusinessDocument extends Omit<IBusiness, '_id'>, Document { }
 
@@ -55,6 +57,14 @@ const BusinessSchema = new Schema(
         description: { type: String, maxlength: 1000 },
         logo: { type: String },
         coverImage: { type: String },
+        gallery: {
+            type: [String],
+            default: [],
+            validate: {
+                validator: (v: string[]) => v.length <= 10,
+                message: 'La galería no puede tener más de 10 imágenes',
+            },
+        },
         category: {
             type: String,
             required: [true, 'La categoría es requerida'],
@@ -124,6 +134,11 @@ const BusinessSchema = new Schema(
         requirePaymentUpfront: { type: Boolean, default: false },
         cancellationPolicy: { type: String, maxlength: 500 },
         isPublished: { type: Boolean, default: false },
+        theme: {
+            type: String,
+            enum: BUSINESS_THEME_IDS satisfies BusinessThemeId[],
+            default: 'salud',
+        },
     },
     {
         timestamps: true,

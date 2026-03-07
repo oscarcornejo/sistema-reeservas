@@ -82,6 +82,56 @@ export async function markNotificationAsRead(
 }
 
 /**
+ * Obtener notificaciones paginadas del usuario autenticado.
+ * Soporta filtro por tipo y estado de lectura.
+ */
+export async function getAllMyNotifications(params: {
+    page?: number;
+    limit?: number;
+    type?: string;
+    isRead?: string;
+}): Promise<ActionResult<{ notifications: INotification[]; total: number; page: number; totalPages: number }>> {
+    const user = await requireAuth();
+
+    try {
+        await connectDB();
+
+        const page = Math.max(1, params.page || 1);
+        const limit = Math.min(50, Math.max(1, params.limit || 20));
+        const skip = (page - 1) * limit;
+
+        const filter: Record<string, unknown> = { recipientId: user.id };
+        if (params.type && params.type !== 'all') {
+            filter.type = params.type;
+        }
+        if (params.isRead === 'true') filter.isRead = true;
+        if (params.isRead === 'false') filter.isRead = false;
+
+        const [notifications, total] = await Promise.all([
+            Notification.find(filter)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit)
+                .lean(),
+            Notification.countDocuments(filter),
+        ]);
+
+        return {
+            success: true,
+            data: {
+                notifications: serialize(notifications) as INotification[],
+                total,
+                page,
+                totalPages: Math.ceil(total / limit),
+            },
+        };
+    } catch (error) {
+        console.error('Error obteniendo notificaciones paginadas:', error);
+        return { success: false, error: 'Error al obtener notificaciones' };
+    }
+}
+
+/**
  * Marcar todas las notificaciones del usuario como leídas.
  */
 export async function markAllNotificationsAsRead(): Promise<ActionResult> {

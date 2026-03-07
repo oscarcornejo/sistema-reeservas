@@ -153,6 +153,13 @@ export const businessSchema = z.object({
     longitude: z.number().min(-180).max(180),
 });
 
+/** Schema para tema visual del negocio */
+export const businessThemeSchema = z.object({
+    theme: z.enum(['salud', 'barberia', 'estetica', 'naturaleza', 'hospedaje', 'fitness'], {
+        error: 'Selecciona un tema válido',
+    }),
+});
+
 /** Schema para información general del negocio (configuración) */
 export const businessSettingsSchema = z.object({
     name: z.string().min(2, 'Mínimo 2 caracteres').max(150),
@@ -270,6 +277,24 @@ export const changePasswordSchema = z.object({
 });
 
 // =============================================================================
+// Clientes (actualización y eliminación)
+// =============================================================================
+
+/** Schema para actualizar un cliente */
+export const updateClientSchema = z.object({
+    clientId: z.string().min(1, 'ID de cliente requerido'),
+    name: z.string().min(2, 'Mínimo 2 caracteres').max(100, 'Máximo 100 caracteres'),
+    phone: z.string().min(8, 'Mínimo 8 caracteres').max(20, 'Máximo 20 caracteres'),
+    notes: z.string().max(2000, 'Máximo 2000 caracteres').optional(),
+    tags: z.array(z.string().max(30)).max(10).optional(),
+});
+
+/** Schema para eliminar un cliente */
+export const deleteClientSchema = z.object({
+    clientId: z.string().min(1, 'ID de cliente requerido'),
+});
+
+// =============================================================================
 // Tipos inferidos (para uso en formularios)
 // =============================================================================
 
@@ -281,6 +306,7 @@ export type AppointmentInput = z.infer<typeof createAppointmentSchema>;
 export type PublicBookingInput = z.infer<typeof publicBookingSchema>;
 export type ProfessionalInput = z.infer<typeof professionalSchema>;
 export type BusinessInput = z.infer<typeof businessSchema>;
+export type BusinessThemeInput = z.infer<typeof businessThemeSchema>;
 export type BusinessSettingsInput = z.infer<typeof businessSettingsSchema>;
 export type BusinessLocationInput = z.infer<typeof businessLocationSchema>;
 export type WorkingHoursInput = z.infer<typeof workingHoursSchema>;
@@ -293,3 +319,5 @@ export type CancelAppointmentInput = z.infer<typeof cancelAppointmentSchema>;
 export type CreateScheduleBlockInput = z.infer<typeof createScheduleBlockSchema>;
 export type RemoveScheduleBlockInput = z.infer<typeof removeScheduleBlockSchema>;
 export type CreateSubscriptionInput = z.infer<typeof createSubscriptionSchema>;
+export type UpdateClientInput = z.infer<typeof updateClientSchema>;
+export type DeleteClientInput = z.infer<typeof deleteClientSchema>;

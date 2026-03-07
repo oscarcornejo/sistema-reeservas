@@ -45,7 +45,9 @@ export function formatDate(
 export function formatTime(time: string): string {
     const [hours, minutes] = time.split(':');
     const h = parseInt(hours, 10);
-    return `${h}:${minutes} ${h >= 12 ? 'PM' : 'AM'}`;
+    const period = h >= 12 ? 'PM' : 'AM';
+    const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+    return `${h12}:${minutes} ${period}`;
 }
 
 /**
@@ -85,13 +87,14 @@ export const DAYS_OF_WEEK = [
 export const BUSINESS_CATEGORIES = [
     'Barbería',
     'Spa',
-    'Centro de Estética',
     'Consultorio Dental',
-    'Consultorio Médico',
-    'Salón de Belleza',
-    'Clínica de Fisioterapia',
-    'Centro de Masajes',
     'Peluquería',
+    'Centro de Estética',
+    'Clínica',
+    'Centro de Masajes',
+    'Salón de Belleza',
+    'Consultorio Médico',
+    'Clínica de Fisioterapia',
     'Uñas y Manicure',
     'Otro',
 ] as const;

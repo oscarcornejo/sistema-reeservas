@@ -6,7 +6,8 @@
 
 'use client';
 
-import { useState, useEffect, useTransition } from 'react';
+import { useState, useEffect, useTransition, useRef } from 'react';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -30,6 +31,12 @@ import {
     Globe,
     Loader2,
     Settings,
+    ImageIcon,
+    Palette,
+    Plus,
+    Trash2,
+    X,
+    Check,
 } from 'lucide-react';
 import {
     getBusinessSettings,
@@ -37,7 +44,11 @@ import {
     updateBusinessLocation,
     updateWorkingHours,
     updateBusinessPreferences,
+    updateBusinessTheme,
+    addGalleryImage,
+    removeGalleryImage,
 } from '@/actions/business';
+import { BUSINESS_THEMES } from '@/lib/themes';
 import { DAYS_OF_WEEK, BUSINESS_CATEGORIES } from '@/lib/utils/format';
 import { toast } from 'sonner';
 import { canAccess } from '@/lib/utils/plan-limits';
@@ -192,25 +203,33 @@ export default function ConfiguracionPage() {
             </div>
 
             <Tabs defaultValue="general" style={{ animation: 'fadeIn 0.4s ease-out 0.05s both' }}>
-                <TabsList className="w-full justify-start bg-muted/50 border border-border/50">
-                    <TabsTrigger value="general">
-                        <Building2 className="mr-1.5 h-4 w-4" />
+                <TabsList variant="line">
+                    <TabsTrigger value="general" className="gap-2 after:bg-primary">
+                        <Building2 className="h-4 w-4" />
                         General
                     </TabsTrigger>
-                    <TabsTrigger value="ubicacion">
-                        <MapPin className="mr-1.5 h-4 w-4" />
+                    <TabsTrigger value="ubicacion" className="gap-2 after:bg-blue-500 dark:after:bg-blue-400">
+                        <MapPin className="h-4 w-4" />
                         Ubicación
                     </TabsTrigger>
-                    <TabsTrigger value="horarios">
-                        <Clock className="mr-1.5 h-4 w-4" />
+                    <TabsTrigger value="horarios" className="gap-2 after:bg-emerald-500 dark:after:bg-emerald-400">
+                        <Clock className="h-4 w-4" />
                         Horarios
                     </TabsTrigger>
-                    <TabsTrigger value="pagos">
-                        <CreditCard className="mr-1.5 h-4 w-4" />
+                    <TabsTrigger value="pagos" className="gap-2 after:bg-amber-500 dark:after:bg-amber-400">
+                        <CreditCard className="h-4 w-4" />
                         Pagos
                     </TabsTrigger>
-                    <TabsTrigger value="publicacion">
-                        <Globe className="mr-1.5 h-4 w-4" />
+                    <TabsTrigger value="galeria" className="gap-2 after:bg-fuchsia-500 dark:after:bg-fuchsia-400">
+                        <ImageIcon className="h-4 w-4" />
+                        Galería
+                    </TabsTrigger>
+                    <TabsTrigger value="tema" className="gap-2 after:bg-rose-500 dark:after:bg-rose-400">
+                        <Palette className="h-4 w-4" />
+                        Tema
+                    </TabsTrigger>
+                    <TabsTrigger value="publicacion" className="gap-2 after:bg-violet-500 dark:after:bg-violet-400">
+                        <Globe className="h-4 w-4" />
                         Publicación
                     </TabsTrigger>
                 </TabsList>
@@ -625,10 +644,138 @@ export default function ConfiguracionPage() {
                     </Card>
                 </TabsContent>
 
+                {/* ============ Tab: Galería ============ */}
+                <TabsContent value="galeria">
+                    <GalleryTab
+                        gallery={business.gallery ?? []}
+                        isPending={isPending}
+                        onUpload={(file) => {
+                            startTransition(async () => {
+                                const formData = new FormData();
+                                formData.append('image', file);
+                                const result = await addGalleryImage(formData);
+                                if (result.success) {
+                                    toast.success('Imagen agregada a la galería');
+                                    const refresh = await getBusinessSettings();
+                                    if (refresh.success && refresh.data) setBusiness(refresh.data);
+                                } else {
+                                    toast.error(result.error);
+                                }
+                            });
+                        }}
+                        onRemove={(url) => {
+                            startTransition(async () => {
+                                const result = await removeGalleryImage(url);
+                                if (result.success) {
+                                    toast.success('Imagen eliminada');
+                                    const refresh = await getBusinessSettings();
+                                    if (refresh.success && refresh.data) setBusiness(refresh.data);
+                                } else {
+                                    toast.error(result.error);
+                                }
+                            });
+                        }}
+                    />
+                </TabsContent>
+
+                {/* ============ Tab: Tema ============ */}
+                <TabsContent value="tema">
+                    <Card className="relative overflow-hidden border-border/50">
+                        <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-rose-500 to-rose-400/40 dark:from-rose-400 dark:to-rose-500/40" />
+                        <CardHeader>
+                            <CardTitle>Tema visual</CardTitle>
+                            <CardDescription>
+                                Personaliza los colores de tu página pública. El tema seleccionado se aplica automáticamente.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                {BUSINESS_THEMES.map((theme) => {
+                                    const isSelected = (business.theme || 'salud') === theme.id;
+                                    return (
+                                        <button
+                                            key={theme.id}
+                                            type="button"
+                                            disabled={isPending}
+                                            onClick={() => {
+                                                if (isSelected) return;
+                                                const prevTheme = business.theme;
+                                                // Optimistic update — feedback visual inmediato
+                                                setBusiness((prev) => prev ? { ...prev, theme: theme.id } : prev);
+                                                startTransition(async () => {
+                                                    try {
+                                                        const result = await updateBusinessTheme(theme.id);
+                                                        if (result.success) {
+                                                            toast.success(`Tema "${theme.label}" aplicado`);
+                                                        } else {
+                                                            toast.error(result.error || 'Error al aplicar el tema');
+                                                            // Revertir al tema anterior
+                                                            setBusiness((prev) => prev ? { ...prev, theme: prevTheme } : prev);
+                                                        }
+                                                    } catch {
+                                                        toast.error('Error al aplicar el tema');
+                                                        // Revertir al tema anterior
+                                                        setBusiness((prev) => prev ? { ...prev, theme: prevTheme } : prev);
+                                                    }
+                                                });
+                                            }}
+                                            className={`relative text-left rounded-xl border-2 p-4 transition-all hover:shadow-md disabled:opacity-50 ${
+                                                isSelected
+                                                    ? 'border-primary shadow-md shadow-primary/10'
+                                                    : 'border-border/50 hover:border-border'
+                                            }`}
+                                        >
+                                            {isSelected && (
+                                                <div className="absolute top-3 right-3 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                                                    <Check className="h-3.5 w-3.5" />
+                                                </div>
+                                            )}
+
+                                            {/* Swatches de color */}
+                                            <div className="flex items-center gap-2 mb-3">
+                                                <div
+                                                    className="h-8 w-8 rounded-lg shadow-sm"
+                                                    style={{ backgroundColor: theme.colors.primary }}
+                                                />
+                                                <div
+                                                    className="h-8 w-8 rounded-lg shadow-sm"
+                                                    style={{ backgroundColor: theme.colors.accent }}
+                                                />
+                                                <div
+                                                    className="h-8 w-8 rounded-lg border shadow-sm"
+                                                    style={{ backgroundColor: theme.colors.background, borderColor: theme.colors.border }}
+                                                />
+                                            </div>
+
+                                            {/* Info */}
+                                            <div className="space-y-1">
+                                                <p className="text-sm font-semibold flex items-center gap-1.5">
+                                                    <span>{theme.emoji}</span>
+                                                    {theme.label}
+                                                </p>
+                                                <p className="text-xs text-muted-foreground leading-relaxed">
+                                                    {theme.description}
+                                                </p>
+                                            </div>
+
+                                            {/* Barra preview */}
+                                            <div className="mt-3 h-2 rounded-full overflow-hidden flex">
+                                                <div className="flex-1" style={{ backgroundColor: theme.colors.primary }} />
+                                                <div className="flex-1" style={{ backgroundColor: theme.colors.accent }} />
+                                                <div className="flex-1" style={{ backgroundColor: theme.colors.muted }} />
+                                            </div>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
                 {/* ============ Tab: Publicación ============ */}
                 <TabsContent value="publicacion">
                     <Card className="relative overflow-hidden border-border/50">
-                        <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-accent to-accent/40 dark:from-accent dark:to-accent/40" />
+                        <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-violet-500 to-violet-400/40 dark:from-violet-400 dark:to-violet-500/40" />
                         <CardHeader>
                             <CardTitle>Visibilidad pública</CardTitle>
                             <CardDescription>
@@ -706,6 +853,184 @@ export default function ConfiguracionPage() {
             }
         });
     }
+}
+
+/** Máximo de imágenes en la galería */
+const MAX_GALLERY_IMAGES = 10;
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
+
+/**
+ * Tab de galería de imágenes del negocio.
+ * Permite subir, previsualizar y eliminar imágenes.
+ */
+function GalleryTab({
+    gallery,
+    isPending,
+    onUpload,
+    onRemove,
+}: {
+    gallery: string[];
+    isPending: boolean;
+    onUpload: (file: File) => void;
+    onRemove: (url: string) => void;
+}) {
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [preview, setPreview] = useState<string | null>(null);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+    const canAdd = gallery.length < MAX_GALLERY_IMAGES;
+
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (!ALLOWED_TYPES.includes(file.type)) {
+            toast.error('Formato no permitido. Usa JPG, PNG o WebP');
+            return;
+        }
+        if (file.size > MAX_SIZE) {
+            toast.error('La imagen no puede superar 5 MB');
+            return;
+        }
+
+        setSelectedFile(file);
+        const url = URL.createObjectURL(file);
+        setPreview(url);
+    };
+
+    const handleUpload = () => {
+        if (!selectedFile) return;
+        onUpload(selectedFile);
+        setPreview(null);
+        setSelectedFile(null);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
+    const cancelPreview = () => {
+        if (preview) URL.revokeObjectURL(preview);
+        setPreview(null);
+        setSelectedFile(null);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
+    return (
+        <Card className="relative overflow-hidden border-border/50">
+            <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-fuchsia-500 to-fuchsia-400/40 dark:from-fuchsia-400 dark:to-fuchsia-500/40" />
+            <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                    <span>Galería de imágenes</span>
+                    <Badge variant="secondary" className="text-xs font-normal">
+                        {gallery.length} de {MAX_GALLERY_IMAGES}
+                    </Badge>
+                </CardTitle>
+                <CardDescription>
+                    Sube fotos de tus instalaciones, trabajos y ambiente. Se mostrarán en tu perfil público.
+                </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+                {/* Grid de imágenes existentes */}
+                {gallery.length > 0 && (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                        {gallery.map((url) => (
+                            <div key={url} className="group relative aspect-[4/3] overflow-hidden rounded-xl border border-border/50">
+                                <Image
+                                    src={url}
+                                    alt="Imagen de galería"
+                                    fill
+                                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                                    className="object-cover"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => onRemove(url)}
+                                    disabled={isPending}
+                                    className="absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-red-500/90 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 disabled:opacity-50"
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                    <span className="sr-only">Eliminar imagen</span>
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                {gallery.length === 0 && !preview && (
+                    <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-border/50 rounded-xl">
+                        <ImageIcon className="h-10 w-10 text-muted-foreground/30 mb-3" />
+                        <p className="text-sm text-muted-foreground mb-1">No hay imágenes en la galería</p>
+                        <p className="text-xs text-muted-foreground">Sube fotos para mostrar tu negocio</p>
+                    </div>
+                )}
+
+                {/* Preview de imagen seleccionada */}
+                {preview && (
+                    <div className="relative rounded-xl border-2 border-dashed border-primary/30 bg-primary/5 p-4">
+                        <p className="text-sm font-medium mb-3">Vista previa</p>
+                        <div className="relative aspect-video max-w-sm overflow-hidden rounded-lg">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                                src={preview}
+                                alt="Vista previa"
+                                className="h-full w-full object-cover"
+                            />
+                        </div>
+                        <div className="flex gap-2 mt-3">
+                            <Button
+                                onClick={handleUpload}
+                                disabled={isPending}
+                                size="sm"
+                                className="bg-gradient-to-r from-primary to-accent hover:opacity-90"
+                            >
+                                {isPending ? 'Subiendo...' : 'Subir imagen'}
+                            </Button>
+                            <Button
+                                onClick={cancelPreview}
+                                variant="ghost"
+                                size="sm"
+                                disabled={isPending}
+                            >
+                                <X className="h-4 w-4 mr-1" />
+                                Cancelar
+                            </Button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Botón para agregar */}
+                {canAdd && !preview && (
+                    <div>
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            onChange={handleFileSelect}
+                            className="hidden"
+                        />
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={isPending}
+                            className="gap-2"
+                        >
+                            <Plus className="h-4 w-4" />
+                            Agregar imagen
+                        </Button>
+                        <p className="text-xs text-muted-foreground mt-2">
+                            JPG, PNG o WebP. Máximo 5 MB por imagen.
+                        </p>
+                    </div>
+                )}
+
+                {!canAdd && !preview && (
+                    <p className="text-sm text-muted-foreground">
+                        Has alcanzado el límite de {MAX_GALLERY_IMAGES} imágenes. Elimina alguna para agregar más.
+                    </p>
+                )}
+            </CardContent>
+        </Card>
+    );
 }
 
 /**

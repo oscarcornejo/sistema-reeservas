@@ -197,15 +197,14 @@ export default function ReportsPage() {
             {/* ── Tabs de reportes ── */}
             <Tabs
                 defaultValue="revenue"
-                className="space-y-4"
                 style={{ animation: 'fadeIn 0.4s ease-out 0.1s both' }}
             >
-                <TabsList className="bg-muted/50 border border-border/50">
-                    <TabsTrigger value="revenue" className="gap-2 data-[state=active]:shadow-sm">
+                <TabsList variant="line">
+                    <TabsTrigger value="revenue" className="gap-2 after:bg-emerald-500 dark:after:bg-emerald-400">
                         <DollarSign className="h-4 w-4" />
                         Facturación
                     </TabsTrigger>
-                    <TabsTrigger value="occupancy" className="gap-2 data-[state=active]:shadow-sm">
+                    <TabsTrigger value="occupancy" className="gap-2 after:bg-blue-500 dark:after:bg-blue-400">
                         <BarChart3 className="h-4 w-4" />
                         Ocupación
                     </TabsTrigger>

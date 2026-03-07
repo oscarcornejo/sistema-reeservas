@@ -123,7 +123,7 @@ export default function TopNavbar({ user }: UserDropdownProps) {
             </Link>
             <div className="flex-1 flex justify-end items-center gap-2">
                 <ThemeToggle />
-                {user.subscriptionPlan === 'enterprise' && <NotificationBell />}
+                <NotificationBell role={user.role} />
                 <UserDropdownMenu user={user} />
             </div>
         </nav>
